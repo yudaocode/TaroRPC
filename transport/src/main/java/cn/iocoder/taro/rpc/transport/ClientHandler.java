@@ -1,6 +1,8 @@
 package cn.iocoder.taro.rpc.transport;
 
+import cn.iocoder.taro.rpc.core.transport.Request;
 import cn.iocoder.taro.rpc.core.transport.Response;
+import cn.iocoder.taro.rpc.core.transport.ResponseFuture;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -37,12 +39,17 @@ public class ClientHandler extends ChannelDuplexHandler {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("接收到消息：" + msg);
-        Response response = (Response) msg;
-        ResponseFuture future = ResponseFuture.getFuture(response.getId());
-        if (future == null) {
-            return; // TODO 芋艿，后续完善
+        if (msg instanceof Response) {
+            Response response = (Response) msg;
+            ResponseFuture future = ResponseFuture.getFuture(response.getId());
+            if (future == null) {
+                return; // TODO 芋艿，后续完善
+            }
+            future.setResponse(response);
+        } else if (msg instanceof Request) {
+            Request response = (Request) msg;
+            System.out.println("消息内容：" + response.getData());
         }
-        future.setResponse(response);
     }
 
 }
