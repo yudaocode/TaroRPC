@@ -16,7 +16,7 @@ public class NettyDecoder extends ByteToMessageDecoder {
         // long requestId
         // int data length
         // string data
-        if (in.readableBytes() <= 2 + 1 + 8) {
+        if (in.readableBytes() <= 2 + 1 + 1 + 8) {
             return;
         }
         in.markReaderIndex();
@@ -26,6 +26,7 @@ public class NettyDecoder extends ByteToMessageDecoder {
             throw new RuntimeException("wlgc 不对");
         }
         byte requestFlag = in.readByte();
+        byte oneway = in.readByte();
         long requestId = in.readLong();
         if (in.readableBytes() <= 4) { // 不够
             in.resetReaderIndex();
@@ -42,6 +43,7 @@ public class NettyDecoder extends ByteToMessageDecoder {
         }
         if (requestFlag == 0) {
             Request request = new Request(requestId);
+            request.setOneway(oneway == 1);
             request.setData(jsonStr);
             out.add(request);
             System.out.println("接收请求：" + jsonStr);

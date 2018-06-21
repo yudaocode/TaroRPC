@@ -10,6 +10,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
+import java.lang.management.ManagementFactory;
+
 public class Client {
 
     private String host;
@@ -35,6 +37,7 @@ public class Client {
         bootstrap.group(group)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.SO_KEEPALIVE, true)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
@@ -62,10 +65,18 @@ public class Client {
 
     public ResponseFuture request(Object message) {
         Request request = new Request();
+        request.setOneway(false);
         request.setData(message);
         channel.writeAndFlush(request);
 
         return new ResponseFuture(request.getId());
+    }
+
+    public void send(Object message) {
+        Request request = new Request();
+        request.setOneway(true);
+        request.setData(message);
+        channel.writeAndFlush(request);
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -73,6 +84,14 @@ public class Client {
         ResponseFuture future = client.request("hello");
         Object result = future.getValue();
         System.out.println(("Client:" + ((Response) result).getValue()));
+
+        client.send("nihao");
+
+//        client.close();
+
+        System.out.println("pid:" + ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
+
+//        System.exit(-1);
     }
 
 }

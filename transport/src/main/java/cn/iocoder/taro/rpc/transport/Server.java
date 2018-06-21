@@ -28,6 +28,9 @@ public class Server {
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 1024)
                     .childHandler(new ChildChannelHandler());
+
+            bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
+
             //绑定端口, 同步等待成功;
             ChannelFuture future = bootstrap.bind(port).sync();
             //等待服务端监听端口关闭

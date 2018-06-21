@@ -17,6 +17,7 @@ public class NettyEncoder extends MessageToByteEncoder<Object> {
             Request request = (Request) msg; // TODO 芋艿，优化
             out.writeShort((short) 0xdabb);
             out.writeByte(0);
+            out.writeByte(request.isOneway() ? 1 : 0); // oneway
             out.writeLong(request.getId());
             String dataString = JSON.toJSONString(request.getData());
             out.writeInt(dataString.length());
@@ -27,6 +28,7 @@ public class NettyEncoder extends MessageToByteEncoder<Object> {
             Response response = (Response) msg; // TODO 芋艿，优化
             out.writeShort((short) 0xdabb);
             out.writeByte(1);
+            out.writeByte(0); // oneway
             out.writeLong(response.getId());
             String dataString = JSON.toJSONString(response.getValue());
             out.writeInt(dataString.length());
