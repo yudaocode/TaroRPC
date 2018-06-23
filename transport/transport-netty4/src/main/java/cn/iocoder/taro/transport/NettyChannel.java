@@ -1,15 +1,22 @@
-package cn.iocoder.taro.rpc.transport;
+package cn.iocoder.taro.transport;
 
 import cn.iocoder.taro.rpc.core.transport.TransportException;
 import cn.iocoder.taro.rpc.core.transport.support.AbstractChannel;
+import io.netty.util.AttributeKey;
 
 import java.net.InetSocketAddress;
 
 public class NettyChannel extends AbstractChannel {
 
+    /**
+     * {@link io.netty.channel.Channel} 存储 {@link NettyChannel} 的 KEY 。
+     */
+    public static final AttributeKey<NettyChannel> ATTR_CHANNEL = AttributeKey.valueOf("channel");
+
     private final io.netty.channel.Channel channel;
 
     public NettyChannel(io.netty.channel.Channel channel) {
+        channel.attr(ATTR_CHANNEL).set(this);
         this.channel = channel;
     }
 

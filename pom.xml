@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cn.iocoder.taro.rpc</groupId>
-    <artifactId>transport</artifactId>
+    <artifactId>parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <build>
@@ -20,27 +20,10 @@
             </plugin>
         </plugins>
     </build>
+
     <modules>
+        <module>transport-core</module>
         <module>transport-netty4</module>
     </modules>
-
-
-    <dependencies>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.25.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.iocoder.taro.rpc</groupId>
-            <artifactId>core</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.47</version>
-        </dependency>
-    </dependencies>
 
 </project>

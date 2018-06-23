@@ -1,12 +1,14 @@
-package cn.iocoder.taro.rpc.transport;
+package cn.iocoder.taro.transport;
 
 import cn.iocoder.taro.rpc.core.transport.Channel;
-import cn.iocoder.taro.rpc.core.transport.Request;
+import cn.iocoder.taro.rpc.core.transport.exchange.ExchangeHandler;
+import cn.iocoder.taro.rpc.core.transport.exchange.Request;
 import cn.iocoder.taro.rpc.core.transport.Server;
 import cn.iocoder.taro.rpc.core.transport.TransportException;
+import cn.iocoder.taro.rpc.core.transport.exchange.Response;
 import cn.iocoder.taro.rpc.core.transport.support.AbstractServer;
-import cn.iocoder.taro.rpc.transport.codec.NettyDecoder;
-import cn.iocoder.taro.rpc.transport.codec.NettyEncoder;
+import cn.iocoder.taro.transport.codec.NettyDecoder;
+import cn.iocoder.taro.transport.codec.NettyEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -28,8 +30,8 @@ public class NettyServer extends AbstractServer {
     private EventLoopGroup workerGroup;
     private ServerNettyChannelManager channelManager;
 
-    public NettyServer(int port) {
-        super(port);
+    public NettyServer(int port, ExchangeHandler exchangeHandler) {
+        super(port, exchangeHandler);
     }
 
     @Override
@@ -51,14 +53,14 @@ public class NettyServer extends AbstractServer {
                                     .addLast("decoder", new NettyDecoder())
                                     .addLast("encoder", new NettyEncoder())
                                     .addLast(channelManager)
-                                    .addLast(new ServerHandler());
+                                    .addLast("handler", new NettyChannelHandler(messageHandler));
                         }
                     });
 
             bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
 
             //绑定端口, 同步等待成功;
-            ChannelFuture future = bootstrap.bind(port).sync();
+            ChannelFuture future = bootstrap.bind(port).sync(); // TODO close 添加
             //等待服务端监听端口关闭
 //            future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
@@ -95,14 +97,34 @@ public class NettyServer extends AbstractServer {
     }
 
     public static void main(String[] args) {
-        Server server = new NettyServer(8080);
-        try {
-            Thread.sleep(10 * 1000L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("开始关闭...");
-        server.close();
+        Server server = new NettyServer(8080, new ExchangeHandler() {
+            @Override
+            public Response reply(Request request) {
+                System.out.println("接收到消息：" + request);
+                if (request.isOneway()) {
+                    System.out.println("oneway 消息，不进行响应");
+                    return null;
+                }
+
+                Response response = new Response(request.getId());
+                response.setEvent(false);
+                response.setStatus(Response.STATUS_SUCCESS);
+                if (request.getData().equals("\"hello\"")) {
+                    response.setValue("world");
+                } else {
+                    response.setValue("unknown");
+                }
+
+                return response;
+            }
+        });
+//        try {
+//            Thread.sleep(10 * 1000L);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("开始关闭...");
+//        server.close();
 //        System.out.println("启动完成");
     }
 

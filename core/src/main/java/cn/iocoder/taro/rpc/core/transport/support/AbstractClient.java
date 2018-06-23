@@ -1,6 +1,8 @@
 package cn.iocoder.taro.rpc.core.transport.support;
 
 import cn.iocoder.taro.rpc.core.transport.*;
+import cn.iocoder.taro.rpc.core.transport.exchange.*;
+import cn.iocoder.taro.rpc.core.transport.heartbeat.HeartbeatMessageHandler;
 
 public abstract class AbstractClient implements Client {
 
@@ -8,9 +10,12 @@ public abstract class AbstractClient implements Client {
     protected final int port;
     private volatile boolean closed = false;
 
-    public AbstractClient(String host, int port) {
+    protected MessageHandler messageHandler;
+
+    public AbstractClient(String host, int port, ExchangeHandler exchangeHandler) {
         this.host = host;
         this.port = port;
+        this.messageHandler = new HeartbeatMessageHandler(new ExchangeMessageHandler(null, exchangeHandler));
 
         open();
     }

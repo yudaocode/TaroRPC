@@ -1,4 +1,4 @@
-package cn.iocoder.taro.rpc.transport;
+package cn.iocoder.taro.transport;
 
 import cn.iocoder.taro.rpc.core.transport.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -17,6 +17,7 @@ public class ServerNettyChannelManager extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         String channelKey = getChannelKey(ctx);
+
         channels.put(channelKey, new NettyChannel(ctx.channel()));
         System.out.println("添加，当前接入：" + channels.size());
         super.channelRegistered(ctx);

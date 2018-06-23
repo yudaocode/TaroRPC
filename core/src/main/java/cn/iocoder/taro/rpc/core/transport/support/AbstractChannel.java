@@ -1,6 +1,10 @@
 package cn.iocoder.taro.rpc.core.transport.support;
 
 import cn.iocoder.taro.rpc.core.transport.*;
+import cn.iocoder.taro.rpc.core.transport.exchange.Request;
+import cn.iocoder.taro.rpc.core.transport.exchange.Response;
+import cn.iocoder.taro.rpc.core.transport.exchange.ResponseCallback;
+import cn.iocoder.taro.rpc.core.transport.exchange.ResponseFuture;
 
 public abstract class AbstractChannel implements Channel {
 

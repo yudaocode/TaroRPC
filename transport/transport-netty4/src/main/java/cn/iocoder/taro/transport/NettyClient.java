@@ -1,12 +1,15 @@
-package cn.iocoder.taro.rpc.transport;
+package cn.iocoder.taro.transport;
 
+import cn.iocoder.taro.rpc.core.common.TaroConstants;
 import cn.iocoder.taro.rpc.core.transport.Channel;
-import cn.iocoder.taro.rpc.core.transport.Response;
-import cn.iocoder.taro.rpc.core.transport.ResponseFuture;
 import cn.iocoder.taro.rpc.core.transport.TransportException;
+import cn.iocoder.taro.rpc.core.transport.exchange.ExchangeHandler;
+import cn.iocoder.taro.rpc.core.transport.exchange.Response;
+import cn.iocoder.taro.rpc.core.transport.exchange.ResponseFuture;
 import cn.iocoder.taro.rpc.core.transport.support.AbstractClient;
-import cn.iocoder.taro.rpc.transport.codec.NettyDecoder;
-import cn.iocoder.taro.rpc.transport.codec.NettyEncoder;
+import cn.iocoder.taro.transport.codec.NettyDecoder;
+import cn.iocoder.taro.transport.codec.NettyEncoder;
+import cn.iocoder.taro.transport.heartbeat.ClientHeartbeatHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -15,8 +18,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 
-import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 
 public class NettyClient extends AbstractClient {
@@ -25,8 +28,8 @@ public class NettyClient extends AbstractClient {
     private Bootstrap bootstrap;
     private NettyChannel channel;
 
-    public NettyClient(String host, int port) {
-        super(host, port);
+    public NettyClient(String host, int port, ExchangeHandler exchangeHandler) {
+        super(host, port, exchangeHandler);
     }
 
     @Override
@@ -45,11 +48,13 @@ public class NettyClient extends AbstractClient {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
+                    protected void initChannel(SocketChannel ch) {
                         ch.pipeline()
                                 .addLast("decoder", new NettyDecoder())
                                 .addLast("encoder", new NettyEncoder())
-                                .addLast(new ClientHandler());
+                                .addLast("idleState", new IdleStateHandler(TaroConstants.TRANSPORT_CLIENT_IDLE, TaroConstants.TRANSPORT_CLIENT_IDLE, 0))
+                                .addLast("heartbeat", new ClientHeartbeatHandler())
+                                .addLast("handler", new NettyChannelHandler(messageHandler));
                     }
                 });
     }
@@ -58,6 +63,7 @@ public class NettyClient extends AbstractClient {
         try {
             ChannelFuture future = bootstrap.connect(host, port).sync();
             this.channel = new NettyChannel(future.channel());
+//            future.channel().attr(NettyChannel.ATTR_CHANNEL).set(this.channel); // 后续移除，已经添加到 NettyChannel
         } catch (InterruptedException e) {
             throw new RuntimeException(e); // TODO 芋艿：异常处理
         }
@@ -100,27 +106,27 @@ public class NettyClient extends AbstractClient {
     }
 
     public static void main(String[] args) throws InterruptedException, TransportException {
-        NettyClient client = new NettyClient("127.0.0.1", 8080);
+        NettyClient client = new NettyClient("127.0.0.1", 8080, null);
 //        NettyClient client = new NettyClient("192.168.16.23", 8080);
         ResponseFuture future = client.requestAsync("hello");
         Object result = future.getValue();
         System.out.println(("Client:" + ((Response) result).getValue()));
 
-        client.send("nihao");
+        client.requestSync("nihao");
 
 //        client.close();
 
-        System.out.println("pid:" + ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
-
-        for (int i = 0; i < 100; i++) {
-            try {
-                Object result2 = future.getValue();
-                System.out.println(("Client:" + ((Response) result2).getValue()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Thread.sleep(10 * 1000L);
-        }
+//        System.out.println("pid:" + ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
+//
+//        for (int i = 0; i < 100; i++) {
+//            try {
+//                Object result2 = future.getValue();
+//                System.out.println(("Client:" + ((Response) result2).getValue()));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            Thread.sleep(10 * 1000L);
+//        }
 
 //        System.exit(-1);
     }
