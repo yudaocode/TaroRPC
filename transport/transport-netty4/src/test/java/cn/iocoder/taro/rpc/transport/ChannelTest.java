@@ -60,19 +60,19 @@ public class ChannelTest {
 
     @Test
     public void testOneway() throws TransportException {
-        client.oneway("hello");
+        client.oneway("hello", 1000);
     }
 
     @Test
     public void testSync() throws TransportException, InterruptedException {
-        Response response = client.requestSync("hello");
+        Response response = client.requestSync("hello", 1000);
         Assert.assertEquals(response.getValue(), "hello");
     }
 
     @Test
     public void testAsync() throws TransportException, InterruptedException {
-        ResponseFuture response = client.requestAsync("hello");
-        Assert.assertEquals(response.getValue().getValue(), "hello");
+        ResponseFuture response = client.requestAsync("hello", 1000);
+        Assert.assertEquals(response.waitResponse().getValue(), "hello");
     }
 
     @Test
@@ -94,7 +94,7 @@ public class ChannelTest {
                 latch.countDown();
             }
 
-        });
+        }, 1000);
         latch.await();
         Assert.assertEquals(result.get(), "hello");
     }
@@ -119,7 +119,7 @@ public class ChannelTest {
                 latch.countDown();
             }
 
-        });
+        }, 1000);
         latch.await();
         Assert.assertEquals(result.get().getClass(), RuntimeException.class); // 芋艿，后续优化
     }

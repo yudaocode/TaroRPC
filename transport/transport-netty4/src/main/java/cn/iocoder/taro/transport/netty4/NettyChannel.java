@@ -32,10 +32,10 @@ public class NettyChannel extends AbstractChannel {
     }
 
     @Override
-    public void send(Object message) {
+    public void send(Object message, long timeoutMillis) {
         ChannelFuture future = channel.writeAndFlush(message);
         try {
-            future.await(30, TimeUnit.SECONDS);
+            future.await(timeoutMillis, TimeUnit.SECONDS);
 //            if (!success) { // TODO 芋艿，再优化
 //                future.cause().printStackTrace();
 //            }

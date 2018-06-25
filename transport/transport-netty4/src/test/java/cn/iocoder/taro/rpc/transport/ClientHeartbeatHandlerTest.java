@@ -54,7 +54,7 @@ public class ClientHeartbeatHandlerTest {
     @Test
     public void testHeartbeat() throws TransportException, InterruptedException {
         Request heartbeat = HeartbeatMessageHandler.createHeartbeatRequest();
-        Response response = client.requestSync(heartbeat);
+        Response response = client.requestSync(heartbeat, 1000);
         System.out.println(response.getValue());
         Assert.assertEquals(heartbeat.getId(), response.getId());
         Assert.assertEquals(heartbeat.getData(), Response.DATA_EVENT_HEARTBEAT);

@@ -88,7 +88,7 @@ public class NettyServer extends AbstractServer {
         // 尝试发送关闭消息
         for (Channel channel : getChannels()) {
             try {
-                channel.oneway(Request.DATA_EVENT_READ_ONLY);
+                channel.oneway(Request.DATA_EVENT_READ_ONLY, 1000); // TODO 芋艿，超时
             } catch (TransportException e) {
                 e.printStackTrace();
             }

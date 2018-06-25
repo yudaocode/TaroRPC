@@ -46,11 +46,11 @@ public class NettyClientTest {
         closeAll();
         // 尝试发送请求，应该是失败的
         try {
-            client.requestSync("hello");
+            client.requestSync("hello", 1000);
         } catch (Exception e) {
             e.printStackTrace();
             client.reconnect();
-            Response result = client.requestSync("hello");
+            Response result = client.requestSync("hello", 1000);
             Assert.assertEquals(result.getValue(), "hello");
         }
     }

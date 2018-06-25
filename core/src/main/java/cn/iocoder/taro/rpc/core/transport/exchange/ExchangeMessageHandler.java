@@ -40,7 +40,7 @@ public class ExchangeMessageHandler implements MessageHandler {
             Response response = exchangeHandler.reply((Request) message);
             if (response != null) {
                 try {
-                    channel.send(response);
+                    channel.send(response, 1000); // TODO 芋艿，超时
                 } catch (TransportException e) {
                     e.printStackTrace(); // TODO 芋艿，后续的处理。
                 }

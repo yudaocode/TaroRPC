@@ -21,28 +21,28 @@ public abstract class AbstractClient implements Client {
     }
 
     @Override
-    public void oneway(Object request) throws TransportException {
-        getChannel().oneway(request);
+    public void oneway(Object request, long timeoutMillis) throws TransportException {
+        getChannel().oneway(request, timeoutMillis);
     }
 
     @Override
-    public Response requestSync(Object request) throws InterruptedException, TransportException {
-        return getChannel().requestSync(request);
+    public Response requestSync(Object request, long timeoutMillis) throws InterruptedException, TransportException {
+        return getChannel().requestSync(request, timeoutMillis);
     }
 
     @Override
-    public ResponseFuture requestAsync(Object request) throws TransportException {
-        return getChannel().requestAsync(request);
+    public ResponseFuture requestAsync(Object request, long timeoutMillis) throws TransportException {
+        return getChannel().requestAsync(request, timeoutMillis);
     }
 
     @Override
-    public void requestWithCallback(Object request, ResponseCallback callback) throws TransportException {
-        getChannel().requestWithCallback(request, callback);
+    public void requestWithCallback(Object request, ResponseCallback callback, long timeoutMillis) throws TransportException {
+        getChannel().requestWithCallback(request, callback, timeoutMillis);
     }
 
     @Override
-    public void send(Object message) throws TransportException {
-        getChannel().send(message);
+    public void send(Object message, long timeoutMillis) throws TransportException {
+        getChannel().send(message, timeoutMillis);
     }
 
     @Override

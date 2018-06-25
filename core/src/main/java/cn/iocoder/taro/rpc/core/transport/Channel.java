@@ -20,14 +20,14 @@ public interface Channel extends Endpoint {
 
     InetSocketAddress getRemoteAddress();
 
-    void send(Object message) throws TransportException;
+    void send(Object message, long timeoutMillis) throws TransportException;
 
-    void oneway(Object request) throws TransportException;
+    void oneway(Object request, long timeoutMillis) throws TransportException;
 
-    Response requestSync(Object request) throws InterruptedException, TransportException;
+    Response requestSync(Object request, long timeoutMillis) throws InterruptedException, TransportException;
 
-    ResponseFuture requestAsync(Object request) throws TransportException;
+    ResponseFuture requestAsync(Object request, long timeoutMillis) throws TransportException;
 
-    void requestWithCallback(Object request, ResponseCallback callback) throws TransportException;
+    void requestWithCallback(Object request, ResponseCallback callback, long timeoutMillis) throws TransportException;
 
 }

@@ -32,7 +32,7 @@ public class ClientHeartbeatHandler extends ChannelDuplexHandler {
                 System.out.println("心跳失败：");
             }
 
-        });
+        }, 1000); // TODO 芋艿，超时
     }
 
 }

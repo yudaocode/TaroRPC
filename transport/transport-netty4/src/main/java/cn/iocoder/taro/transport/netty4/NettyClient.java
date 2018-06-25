@@ -115,8 +115,8 @@ public class NettyClient extends AbstractClient {
 //        NettyClient client = new NettyClient("127.0.0.1", 8080, null);
 ////        NettyClient client = new NettyClient("192.168.16.23", 8080);
 //        ResponseFuture future = client.requestAsync("hello");
-//        Object result = future.getValue();
-//        System.out.println(("Client:" + ((Response) result).getValue()));
+//        Object result = future.waitResponse();
+//        System.out.println(("Client:" + ((Response) result).waitResponse()));
 //
 //        client.requestSync("nihao");
 //
@@ -126,8 +126,8 @@ public class NettyClient extends AbstractClient {
 ////
 ////        for (int i = 0; i < 100; i++) {
 ////            try {
-////                Object result2 = future.getValue();
-////                System.out.println(("Client:" + ((Response) result2).getValue()));
+////                Object result2 = future.waitResponse();
+////                System.out.println(("Client:" + ((Response) result2).waitResponse()));
 ////            } catch (Exception e) {
 ////                e.printStackTrace();
 ////            }

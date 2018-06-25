@@ -9,27 +9,41 @@ import cn.iocoder.taro.rpc.core.transport.exchange.ResponseFuture;
 public abstract class AbstractChannel implements Channel {
 
     @Override
-    public void oneway(Object request) throws TransportException {
+    public void oneway(Object request, long timeoutMillis) throws TransportException {
         Request req = buildRequest(request, true);
-        send(req);
+        send(req, timeoutMillis);
     }
 
     @Override
-    public Response requestSync(Object request) throws InterruptedException, TransportException {
-        ResponseFuture future = this.requestAsync(request);
-        return future.getValue();
-    }
-
-    @Override
-    public ResponseFuture requestAsync(Object request) throws TransportException {
+    public Response requestSync(Object request, long timeoutMillis) throws InterruptedException, TransportException { // 参考自 sofa-bolt ，不同于 dubbo 和 motan 的方式。避免无效的扫描。
+//        ResponseFuture future = this.requestAsync(request);
+//        return future.waitResponse();
         Request req = buildRequest(request, false);
-        send(req);
-        return new ResponseFuture(req.getId());
+        ResponseFuture future = new ResponseFuture(this, req);
+        send(req, timeoutMillis);
+        // 等待结果
+        Response response = future.waitResponse(timeoutMillis);
+        // 正常结果
+        if (response != null) {
+            return response;
+        }
+        // 超时结果
+        response = ResponseFuture.createTimeoutResponse(req.getId());
+        return response;
     }
 
     @Override
-    public void requestWithCallback(Object request, ResponseCallback callback) throws TransportException {
-        ResponseFuture future = this.requestAsync(request);
+    public ResponseFuture requestAsync(Object request, long timeoutMillis) throws TransportException {
+        Request req = buildRequest(request, false);
+        ResponseFuture future = new ResponseFuture(this, req);
+        ResponseFuture.addTimeoutTask(future, timeoutMillis); // 设置超时任务
+        send(req, timeoutMillis);
+        return future;
+    }
+
+    @Override
+    public void requestWithCallback(Object request, ResponseCallback callback, long timeoutMillis) throws TransportException {
+        ResponseFuture future = this.requestAsync(request, timeoutMillis);
         future.setCallback(callback);
     }
 
