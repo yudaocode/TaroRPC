@@ -9,8 +9,6 @@ public interface Endpoint {
 
     InetSocketAddress getLocalAddress();
 
-    void send(Object message) throws TransportException;
-
     void open();
 
     void close();

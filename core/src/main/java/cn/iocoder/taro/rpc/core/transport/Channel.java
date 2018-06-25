@@ -20,6 +20,8 @@ public interface Channel extends Endpoint {
 
     InetSocketAddress getRemoteAddress();
 
+    void send(Object message) throws TransportException;
+
     void oneway(Object request) throws TransportException;
 
     Response requestSync(Object request) throws InterruptedException, TransportException;

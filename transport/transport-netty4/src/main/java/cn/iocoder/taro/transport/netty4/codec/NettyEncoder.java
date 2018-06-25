@@ -1,4 +1,4 @@
-package cn.iocoder.taro.transport.codec;
+package cn.iocoder.taro.transport.netty4.codec;
 
 import cn.iocoder.taro.rpc.core.transport.exchange.Request;
 import cn.iocoder.taro.rpc.core.transport.exchange.Response;
@@ -18,7 +18,7 @@ public class NettyEncoder extends MessageToByteEncoder<Object> {
             out.writeShort((short) 0xdabb); // magic number
             out.writeByte(0); // 请求标识
             out.writeByte(request.isOneway() ? 1 : 0); // oneway
-            out.writeByte(request.isEvnet() ? 1 : 0); // event
+            out.writeByte(request.isEvent() ? 1 : 0); // event
             out.writeLong(request.getId()); // id
             String dataString = JSON.toJSONString(request.getData());
             out.writeInt(dataString.length()); // data length

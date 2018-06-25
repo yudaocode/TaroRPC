@@ -10,9 +10,7 @@ public abstract class AbstractChannel implements Channel {
 
     @Override
     public void oneway(Object request) throws TransportException {
-        Request req = new Request();
-        req.setOneway(true);
-        req.setData(req);
+        Request req = buildRequest(request, true);
         send(req);
     }
 
@@ -24,11 +22,8 @@ public abstract class AbstractChannel implements Channel {
 
     @Override
     public ResponseFuture requestAsync(Object request) throws TransportException {
-        Request req = new Request();
-        req.setOneway(false);
-        req.setData(req);
+        Request req = buildRequest(request, false);
         send(req);
-
         return new ResponseFuture(req.getId());
     }
 
@@ -36,6 +31,21 @@ public abstract class AbstractChannel implements Channel {
     public void requestWithCallback(Object request, ResponseCallback callback) throws TransportException {
         ResponseFuture future = this.requestAsync(request);
         future.setCallback(callback);
+    }
+
+    private Request buildRequest(Object data, boolean oneway) {
+        Request request;
+         if (data instanceof Request) {
+            request = new Request(((Request) data).getId());
+            request.setData(((Request) data).getData());
+            request.setEvent(((Request) data).isEvent());
+        } else {
+            request = new Request();
+            request.setData(data);
+            request.setEvent(false);
+        }
+        request.setOneway(oneway);
+        return request;
     }
 
 //    @Override // 子类实现

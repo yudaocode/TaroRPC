@@ -6,8 +6,9 @@ public class Response {
      * 状态 - 成功
      */
     public static final byte STATUS_SUCCESS = 0;
+    public static final byte STATUS_TIMEOUT = 1; // TODO 芋艿，不区分超时类型。客户端超时 or 服务端超时
 
-    public static final String DATA_EVENT_HEARTBEAT = null;
+    public static final String DATA_EVENT_HEARTBEAT = "heartbeat";
 
     private final long id;
     private boolean event;
@@ -58,4 +59,16 @@ public class Response {
         this.event = event;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "Response{" +
+                "id=" + id +
+                ", event=" + event +
+                ", status=" + status +
+                ", value=" + value +
+                ", exception=" + exception +
+                '}';
+    }
+
 }

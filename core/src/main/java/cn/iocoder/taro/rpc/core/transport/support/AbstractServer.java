@@ -2,7 +2,6 @@ package cn.iocoder.taro.rpc.core.transport.support;
 
 import cn.iocoder.taro.rpc.core.transport.MessageHandler;
 import cn.iocoder.taro.rpc.core.transport.Server;
-import cn.iocoder.taro.rpc.core.transport.TransportException;
 import cn.iocoder.taro.rpc.core.transport.exchange.ExchangeHandler;
 import cn.iocoder.taro.rpc.core.transport.exchange.ExchangeMessageHandler;
 import cn.iocoder.taro.rpc.core.transport.heartbeat.HeartbeatMessageHandler;
@@ -40,10 +39,6 @@ public abstract class AbstractServer implements Server {
     @Override
     public InetSocketAddress getLocalAddress() {
         return null;
-    }
-
-    @Override
-    public void send(Object message) throws TransportException {
     }
 
     @Override

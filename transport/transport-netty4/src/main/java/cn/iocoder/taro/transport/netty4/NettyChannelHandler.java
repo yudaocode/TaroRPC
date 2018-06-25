@@ -1,4 +1,4 @@
-package cn.iocoder.taro.transport;
+package cn.iocoder.taro.transport.netty4;
 
 import cn.iocoder.taro.rpc.core.transport.MessageHandler;
 import io.netty.channel.ChannelDuplexHandler;

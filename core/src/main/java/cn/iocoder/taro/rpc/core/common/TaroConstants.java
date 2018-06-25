@@ -6,10 +6,10 @@ public class TaroConstants {
     /**
      * 通信模块 - 客户端空闲模块，单位：毫秒
      */
-    public static final int TRANSPORT_CLIENT_IDLE = 150000;
+    public static int TRANSPORT_CLIENT_IDLE = 15 * 1000; // TODO 芋艿，这里先硬编码
     /**
      * 通信模块 - 服务端空闲时间，单位：毫秒
      */
-    public static final int TRANSPORT_SERVER_IDLE = 900000;
+    public static int TRANSPORT_SERVER_IDLE = 90 * 1000; // TODO 芋艿，这里先硬编码
 
 }

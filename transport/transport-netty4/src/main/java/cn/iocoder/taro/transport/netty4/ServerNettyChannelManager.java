@@ -1,6 +1,7 @@
-package cn.iocoder.taro.transport;
+package cn.iocoder.taro.transport.netty4;
 
 import cn.iocoder.taro.rpc.core.transport.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -10,6 +11,7 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+@ChannelHandler.Sharable
 public class ServerNettyChannelManager extends ChannelInboundHandlerAdapter {
 
     private ConcurrentMap<String, Channel> channels = new ConcurrentHashMap<String, Channel>();

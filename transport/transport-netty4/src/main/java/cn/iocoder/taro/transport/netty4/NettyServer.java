@@ -1,14 +1,14 @@
-package cn.iocoder.taro.transport;
+package cn.iocoder.taro.transport.netty4;
 
+import cn.iocoder.taro.rpc.core.common.TaroConstants;
 import cn.iocoder.taro.rpc.core.transport.Channel;
+import cn.iocoder.taro.rpc.core.transport.TransportException;
 import cn.iocoder.taro.rpc.core.transport.exchange.ExchangeHandler;
 import cn.iocoder.taro.rpc.core.transport.exchange.Request;
-import cn.iocoder.taro.rpc.core.transport.Server;
-import cn.iocoder.taro.rpc.core.transport.TransportException;
-import cn.iocoder.taro.rpc.core.transport.exchange.Response;
 import cn.iocoder.taro.rpc.core.transport.support.AbstractServer;
-import cn.iocoder.taro.transport.codec.NettyDecoder;
-import cn.iocoder.taro.transport.codec.NettyEncoder;
+import cn.iocoder.taro.transport.netty4.codec.NettyDecoder;
+import cn.iocoder.taro.transport.netty4.codec.NettyEncoder;
+import cn.iocoder.taro.transport.netty4.heartbeat.ServerHeartbeatHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -17,14 +17,15 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 public class NettyServer extends AbstractServer {
 
     private ServerBootstrap bootstrap;
-    private ServerHandler handler;
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
@@ -52,7 +53,9 @@ public class NettyServer extends AbstractServer {
                             ch.pipeline()
                                     .addLast("decoder", new NettyDecoder())
                                     .addLast("encoder", new NettyEncoder())
-                                    .addLast(channelManager)
+                                    .addLast("manager", channelManager)
+                                    .addLast("idleState", new IdleStateHandler(0, 0, TaroConstants.TRANSPORT_SERVER_IDLE, TimeUnit.MILLISECONDS))
+                                    .addLast("heartbeat", new ServerHeartbeatHandler())
                                     .addLast("handler", new NettyChannelHandler(messageHandler));
                         }
                     });
@@ -96,36 +99,36 @@ public class NettyServer extends AbstractServer {
         workerGroup.shutdownGracefully();
     }
 
-    public static void main(String[] args) {
-        Server server = new NettyServer(8080, new ExchangeHandler() {
-            @Override
-            public Response reply(Request request) {
-                System.out.println("接收到消息：" + request);
-                if (request.isOneway()) {
-                    System.out.println("oneway 消息，不进行响应");
-                    return null;
-                }
-
-                Response response = new Response(request.getId());
-                response.setEvent(false);
-                response.setStatus(Response.STATUS_SUCCESS);
-                if (request.getData().equals("\"hello\"")) {
-                    response.setValue("world");
-                } else {
-                    response.setValue("unknown");
-                }
-
-                return response;
-            }
-        });
-//        try {
-//            Thread.sleep(10 * 1000L);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println("开始关闭...");
-//        server.close();
-//        System.out.println("启动完成");
-    }
+//    public static void main(String[] args) {
+//        Server server = new NettyServer(8080, new ExchangeHandler() {
+//            @Override
+//            public Response reply(Request request) {
+//                System.out.println("接收到消息：" + request);
+//                if (request.isOneway()) {
+//                    System.out.println("oneway 消息，不进行响应");
+//                    return null;
+//                }
+//
+//                Response response = new Response(request.getId());
+//                response.setEvent(false);
+//                response.setStatus(Response.STATUS_SUCCESS);
+//                if (request.getData().equals("\"hello\"")) {
+//                    response.setValue("world");
+//                } else {
+//                    response.setValue("unknown");
+//                }
+//
+//                return response;
+//            }
+//        });
+////        try {
+////            Thread.sleep(10 * 1000L);
+////        } catch (InterruptedException e) {
+////            e.printStackTrace();
+////        }
+////        System.out.println("开始关闭...");
+////        server.close();
+////        System.out.println("启动完成");
+//    }
 
 }

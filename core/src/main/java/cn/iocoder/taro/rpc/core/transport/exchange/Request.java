@@ -6,7 +6,7 @@ public class Request {
 
     private static final AtomicLong ID_GENERATOR = new AtomicLong();
 
-    public static final String DATA_EVENT_HEARTBEAT = null;
+    public static final String DATA_EVENT_HEARTBEAT = "heartbeat";
     public static final String DATA_EVENT_READ_ONLY = "readOnly";
 
     private long id;
@@ -19,7 +19,7 @@ public class Request {
     /**
      * 是否为事件
      */
-    private boolean evnet;
+    private boolean event;
     private Object data;
 
     public Request(long id) {
@@ -52,12 +52,23 @@ public class Request {
         return this;
     }
 
-    public boolean isEvnet() {
-        return evnet;
+    public boolean isEvent() {
+        return event;
     }
 
-    public Request setEvnet(boolean evnet) {
-        this.evnet = evnet;
+    public Request setEvent(boolean event) {
+        this.event = event;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "Request{" +
+                "id=" + id +
+                ", oneway=" + oneway +
+                ", event=" + event +
+                ", data=" + data +
+                '}';
+    }
+
 }

@@ -1,7 +1,8 @@
-package cn.iocoder.taro.transport.codec;
+package cn.iocoder.taro.transport.netty4.codec;
 
 import cn.iocoder.taro.rpc.core.transport.exchange.Request;
 import cn.iocoder.taro.rpc.core.transport.exchange.Response;
+import com.alibaba.fastjson.JSON;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -49,8 +50,8 @@ public class NettyDecoder extends ByteToMessageDecoder {
             }
             Request request = new Request(requestId);
             request.setOneway(oneway == 1);
-            request.setEvnet(event == 1);
-            request.setData(jsonStr);
+            request.setEvent(event == 1);
+            request.setData(JSON.parse(jsonStr.toString()));
             out.add(request);
             System.out.println("接收请求：" + jsonStr);
         } else if (requestFlag == 1) {
@@ -73,7 +74,7 @@ public class NettyDecoder extends ByteToMessageDecoder {
             Response response = new Response(requestId);
             response.setEvent(false);
             response.setStatus(Response.STATUS_SUCCESS);
-            response.setValue(jsonStr);
+            response.setValue(JSON.parse(jsonStr.toString()));
             out.add(response);
             System.out.println("接收响应：" + jsonStr);
         }

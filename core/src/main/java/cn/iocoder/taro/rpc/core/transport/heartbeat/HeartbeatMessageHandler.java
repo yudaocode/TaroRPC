@@ -14,19 +14,19 @@ public class HeartbeatMessageHandler implements MessageHandler {
     }
 
     public static Request createHeartbeatRequest() {
-        return new Request().setOneway(false).setEvnet(true).setData(Request.DATA_EVENT_HEARTBEAT);
+        return new Request().setEvent(true).setData(Request.DATA_EVENT_HEARTBEAT);
     }
 
     public static boolean isHeartbeatRequest(Request request) {
-        return request.isEvnet()
+        return request.isEvent()
                 && ObjectUtil.equals(request.getData(), Request.DATA_EVENT_HEARTBEAT);
     }
 
-    public static Response createHeartbetaResponse(long id) {
+    public static Response createHeartbeatResponse(long id) {
         return new Response(id).setEvent(true).setStatus(Response.STATUS_SUCCESS).setValue(Response.DATA_EVENT_HEARTBEAT);
     }
 
-    public static boolean createHeartbetaResponse(Response response) {
+    public static boolean isHeartbeatResponse(Response response) {
         return response.isEvent()
                 && response.getStatus() == Response.STATUS_SUCCESS
                 && ObjectUtil.equals(response.getValue(), Response.DATA_EVENT_HEARTBEAT);
@@ -37,7 +37,7 @@ public class HeartbeatMessageHandler implements MessageHandler {
         if (message instanceof Request) {
             Request request = (Request) message;
             if (isHeartbeatRequest(request)) {
-                Response response = createHeartbetaResponse(request.getId()); // 心跳的情况下，默认为 oneway 。
+                Response response = createHeartbeatResponse(request.getId()); // 心跳的情况下，默认为 oneway 。
                 try {
                     channel.send(response);
                 } catch (TransportException e) {

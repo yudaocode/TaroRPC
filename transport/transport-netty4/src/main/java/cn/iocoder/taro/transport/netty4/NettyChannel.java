@@ -1,10 +1,11 @@
-package cn.iocoder.taro.transport;
+package cn.iocoder.taro.transport.netty4;
 
-import cn.iocoder.taro.rpc.core.transport.TransportException;
 import cn.iocoder.taro.rpc.core.transport.support.AbstractChannel;
+import io.netty.channel.ChannelFuture;
 import io.netty.util.AttributeKey;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 public class NettyChannel extends AbstractChannel {
 
@@ -31,8 +32,19 @@ public class NettyChannel extends AbstractChannel {
     }
 
     @Override
-    public void send(Object message) throws TransportException {
-        channel.writeAndFlush(message);
+    public void send(Object message) {
+        ChannelFuture future = channel.writeAndFlush(message);
+        try {
+            future.await(30, TimeUnit.SECONDS);
+//            if (!success) { // TODO 芋艿，再优化
+//                future.cause().printStackTrace();
+//            }
+            if (future.cause() != null) {
+                throw new RuntimeException(future.cause());
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
