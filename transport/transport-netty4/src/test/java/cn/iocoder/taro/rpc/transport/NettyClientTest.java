@@ -55,6 +55,15 @@ public class NettyClientTest {
         }
     }
 
+    @Test
+    public void testSendError() throws InterruptedException, TransportException {
+        // Server 关闭所有连接
+        closeAll();
+        // 尝试发送请求，应该是失败的
+        Response response = client.requestSync("hello", 1000);
+        Assert.assertNotNull(response.getException());
+    }
+
     /**
      * Server 关闭所有连接
      */

@@ -40,18 +40,18 @@ public class ExchangeMessageHandler implements MessageHandler {
             Response response = exchangeHandler.reply((Request) message);
             if (response != null) {
                 try {
-                    channel.send(response, 1000); // TODO 芋艿，超时
+                    channel.send(response);
                 } catch (TransportException e) {
                     e.printStackTrace(); // TODO 芋艿，后续的处理。
                 }
             }
         } else if (message instanceof Response) {
             Response response = (Response) message;
-            ResponseFuture future = ResponseFuture.getFuture(response.getId());
+            InvokeFuture future = InvokeFuture.getFuture(response.getId());
             if (future == null) {
                 return; // TODO 芋艿，后续完善
             }
-            future.setResponse(response);
+            future.notifyResponse(response);
         }
     }
 

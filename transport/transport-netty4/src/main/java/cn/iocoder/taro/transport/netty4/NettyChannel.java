@@ -1,11 +1,13 @@
 package cn.iocoder.taro.transport.netty4;
 
+import cn.iocoder.taro.rpc.core.transport.exchange.Request;
+import cn.iocoder.taro.rpc.core.transport.exchange.InvokeFuture;
 import cn.iocoder.taro.rpc.core.transport.support.AbstractChannel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.util.AttributeKey;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 
 public class NettyChannel extends AbstractChannel {
 
@@ -32,19 +34,29 @@ public class NettyChannel extends AbstractChannel {
     }
 
     @Override
-    public void send(Object message, long timeoutMillis) {
-        ChannelFuture future = channel.writeAndFlush(message);
-        try {
-            future.await(timeoutMillis, TimeUnit.SECONDS);
-//            if (!success) { // TODO 芋艿，再优化
-//                future.cause().printStackTrace();
-//            }
-            if (future.cause() != null) {
-                throw new RuntimeException(future.cause());
+    public void send(final Object message) {
+        ChannelFuture writeFuture = channel.writeAndFlush(message);
+        writeFuture.addListener(new ChannelFutureListener() {
+
+            @Override
+            public void operationComplete(final ChannelFuture writeFuture) {
+                if (writeFuture.isSuccess()) { // 成功不处理
+                    return;
+                }
+                if (!(message instanceof Request)) { // 只处理请求
+                    return;
+                }
+                Request request = (Request) message;
+                if (request.isOneway()) { // 只有需要响应的请求，才有 ResponseFuture
+                    return;
+                }
+                InvokeFuture future = InvokeFuture.getFuture(request.getId());
+                if (future != null) {
+                    future.notifyResponse(InvokeFuture.createTimeoutResponse(request.getId())); // TODO 芋艿，需要修改下
+                }
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        });
     }
 
     @Override

@@ -8,11 +8,12 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class ResponseFuture {
+public class InvokeFuture {
 
-    private static final ConcurrentMap<Long, ResponseFuture> FUTURES = new ConcurrentHashMap<Long, ResponseFuture>();
+    private static final ConcurrentMap<Long, InvokeFuture> FUTURES = new ConcurrentHashMap<Long, InvokeFuture>();
+    private static final TimeoutTaskScanner SCANNER = new TimeoutTaskScanner();
 
-//    private final Object lock = new Object();
+    //    private final Object lock = new Object();
     private final CountDownLatch latch = new CountDownLatch(1); // TODO 芋艿，性能，后续对比三种方式的性能差别
     private final Channel channel;
     private final Request request;
@@ -25,19 +26,17 @@ public class ResponseFuture {
     private long timeoutMillis = 0;
 
     static {
-        Thread th = new Thread(new TimeoutFutureScanner());
+        Thread th = new Thread(SCANNER);
         th.setDaemon(true);
         th.start();
     }
 
-    public ResponseFuture(Channel channel, Request request) {
+    public InvokeFuture(Channel channel, Request request) {
         this.channel = channel;
         this.request = request;
+        // 添加到 FUTURES 中
+        FUTURES.put(request.getId(), this);
     }
-
-//    public ResponseFuture(Long id) {
-//        FUTURES.put(id, this);
-//    }
 
     public Response waitResponse() throws InterruptedException {
         if (isDone()) {
@@ -57,7 +56,15 @@ public class ResponseFuture {
         return response;
     }
 
-    public void setResponse(Response response) {
+    public boolean notifyResponse(Response response) {
+        // 通过移除，保证只有一个结果设置成功
+        InvokeFuture future = FUTURES.remove(response.getId());
+        if (future == null) {
+            return false;
+        }
+        // 移除超时任务
+        SCANNER.removeTask(future);
+        // 设置响应
         try {
             this.response = response;
             // 回调
@@ -65,9 +72,8 @@ public class ResponseFuture {
         } finally {
             // 唤醒
             latch.countDown();
-            // 移除
-            FUTURES.remove(response.getId());
         }
+        return true;
     }
 
     public boolean isDone() {
@@ -78,7 +84,7 @@ public class ResponseFuture {
         return callback;
     }
 
-    public ResponseFuture setCallback(ResponseCallback callback) {
+    public InvokeFuture setCallback(ResponseCallback callback) {
         this.callback = callback;
         // 回调
         onCallback(response, callback);
@@ -95,38 +101,51 @@ public class ResponseFuture {
         }
     }
 
-    public static void addTimeoutTask(ResponseFuture future, long timeoutMillis) {
-        future.startTimeMillis = System.currentTimeMillis();
-        future.timeoutMillis = future.startTimeMillis + timeoutMillis;
-        FUTURES.put(future.request.getId(), future);
+    public static void addTimeoutTask(InvokeFuture future, long timeoutMillis) {
+        SCANNER.addTask(future, timeoutMillis);
     }
 
-    private static class TimeoutFutureScanner implements Runnable {
+    private static class TimeoutTaskScanner implements Runnable {
+
+        private final ConcurrentMap<Long, InvokeFuture> tasks = new ConcurrentHashMap<Long, InvokeFuture>();
 
         @Override
         public void run() {
             while (true) {
                 try {
-                for (Map.Entry<Long, ResponseFuture> entry : FUTURES.entrySet()) {
-                    ResponseFuture future = entry.getValue();
-                    if (System.currentTimeMillis() > future.timeoutMillis) {
-                        continue;
+                    for (Map.Entry<Long, InvokeFuture> entry : tasks.entrySet()) {
+                        InvokeFuture future = entry.getValue();
+                        if (System.currentTimeMillis() < future.timeoutMillis) {
+                            continue;
+                        }
+                        // 超时
+                        Response response = createTimeoutResponse(entry.getKey());
+                        boolean success = future.notifyResponse(response);
+                        if (!success) { //
+                            removeTask(future);
+                        }
                     }
-                    // 超时
-                    Response response = createTimeoutResponse(entry.getKey());
-                    future.setResponse(response);
                     // 等待下一个轮回
                     Thread.sleep(30);
-                }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
 
+        void addTask(InvokeFuture future, long timeoutMillis) {
+            future.startTimeMillis = System.currentTimeMillis();
+            future.timeoutMillis = future.startTimeMillis + timeoutMillis;
+            this.tasks.put(future.request.getId(), future);
+        }
+
+        void removeTask(InvokeFuture future) {
+            tasks.remove(future.request.getId());
+        }
+
     }
 
-    public static ResponseFuture getFuture(long requestId) {
+    public static InvokeFuture getFuture(long requestId) {
         return FUTURES.get(requestId);
     }
 

@@ -31,7 +31,7 @@ public abstract class AbstractClient implements Client {
     }
 
     @Override
-    public ResponseFuture requestAsync(Object request, long timeoutMillis) throws TransportException {
+    public InvokeFuture requestAsync(Object request, long timeoutMillis) throws TransportException {
         return getChannel().requestAsync(request, timeoutMillis);
     }
 
@@ -41,8 +41,8 @@ public abstract class AbstractClient implements Client {
     }
 
     @Override
-    public void send(Object message, long timeoutMillis) throws TransportException {
-        getChannel().send(message, timeoutMillis);
+    public void send(Object message) throws TransportException {
+        getChannel().send(message);
     }
 
     @Override

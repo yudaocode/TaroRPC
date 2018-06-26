@@ -4,14 +4,14 @@ import cn.iocoder.taro.rpc.core.transport.*;
 import cn.iocoder.taro.rpc.core.transport.exchange.Request;
 import cn.iocoder.taro.rpc.core.transport.exchange.Response;
 import cn.iocoder.taro.rpc.core.transport.exchange.ResponseCallback;
-import cn.iocoder.taro.rpc.core.transport.exchange.ResponseFuture;
+import cn.iocoder.taro.rpc.core.transport.exchange.InvokeFuture;
 
 public abstract class AbstractChannel implements Channel {
 
     @Override
     public void oneway(Object request, long timeoutMillis) throws TransportException {
         Request req = buildRequest(request, true);
-        send(req, timeoutMillis);
+        send(req);
     }
 
     @Override
@@ -19,8 +19,8 @@ public abstract class AbstractChannel implements Channel {
 //        ResponseFuture future = this.requestAsync(request);
 //        return future.waitResponse();
         Request req = buildRequest(request, false);
-        ResponseFuture future = new ResponseFuture(this, req);
-        send(req, timeoutMillis);
+        InvokeFuture future = new InvokeFuture(this, req);
+        send(req);
         // 等待结果
         Response response = future.waitResponse(timeoutMillis);
         // 正常结果
@@ -28,22 +28,22 @@ public abstract class AbstractChannel implements Channel {
             return response;
         }
         // 超时结果
-        response = ResponseFuture.createTimeoutResponse(req.getId());
+        response = InvokeFuture.createTimeoutResponse(req.getId());
         return response;
     }
 
     @Override
-    public ResponseFuture requestAsync(Object request, long timeoutMillis) throws TransportException {
+    public InvokeFuture requestAsync(Object request, long timeoutMillis) throws TransportException {
         Request req = buildRequest(request, false);
-        ResponseFuture future = new ResponseFuture(this, req);
-        ResponseFuture.addTimeoutTask(future, timeoutMillis); // 设置超时任务
-        send(req, timeoutMillis);
+        InvokeFuture future = new InvokeFuture(this, req);
+        InvokeFuture.addTimeoutTask(future, timeoutMillis); // 设置超时任务
+        send(req);
         return future;
     }
 
     @Override
     public void requestWithCallback(Object request, ResponseCallback callback, long timeoutMillis) throws TransportException {
-        ResponseFuture future = this.requestAsync(request, timeoutMillis);
+        InvokeFuture future = this.requestAsync(request, timeoutMillis);
         future.setCallback(callback);
     }
 

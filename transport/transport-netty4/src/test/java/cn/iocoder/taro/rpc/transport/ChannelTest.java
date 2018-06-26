@@ -65,14 +65,14 @@ public class ChannelTest {
 
     @Test
     public void testSync() throws TransportException, InterruptedException {
-        Response response = client.requestSync("hello", 1000);
+        Response response = client.requestSync("hello", 10000);
         Assert.assertEquals(response.getValue(), "hello");
     }
 
     @Test
     public void testAsync() throws TransportException, InterruptedException {
-        ResponseFuture response = client.requestAsync("hello", 1000);
-        Assert.assertEquals(response.waitResponse().getValue(), "hello");
+        InvokeFuture future = client.requestAsync("hello", 1000);
+        Assert.assertEquals(future.waitResponse().getValue(), "hello");
     }
 
     @Test

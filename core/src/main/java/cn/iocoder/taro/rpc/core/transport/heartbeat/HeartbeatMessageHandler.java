@@ -39,7 +39,7 @@ public class HeartbeatMessageHandler implements MessageHandler {
             if (isHeartbeatRequest(request)) {
                 Response response = createHeartbeatResponse(request.getId()); // 心跳的情况下，默认为 oneway 。
                 try {
-                    channel.send(response, 1000); // TODO 芋艿，超时
+                    channel.send(response);
                 } catch (TransportException e) {
                     e.printStackTrace(); // TODO 芋艿，后续在考虑下这个异常的处理。
                 }

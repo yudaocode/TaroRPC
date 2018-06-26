@@ -14,7 +14,6 @@ public class NettyChannelHandler extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        // TODO 芋艿，逻辑线程池
         NettyChannel channel = ctx.channel().attr(NettyChannel.ATTR_CHANNEL).get();
         messageHandler.handle(channel, msg);
     }
