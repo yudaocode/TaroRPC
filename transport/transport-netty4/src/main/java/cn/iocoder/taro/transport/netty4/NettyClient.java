@@ -48,8 +48,8 @@ public class NettyClient extends AbstractClient {
                     @Override
                     protected void initChannel(SocketChannel ch) {
                         ch.pipeline()
-                                .addLast("decoder", new NettyDecoder())
-                                .addLast("encoder", new NettyEncoder())
+                                .addLast("decoder", new NettyDecoder(codec))
+                                .addLast("encoder", new NettyEncoder(codec))
                                 .addLast("idleState", new IdleStateHandler(TaroConstants.TRANSPORT_CLIENT_IDLE, TaroConstants.TRANSPORT_CLIENT_IDLE, 0, TimeUnit.MILLISECONDS))
                                 .addLast("heartbeat", new ClientHeartbeatHandler())
                                 .addLast("handler", new NettyChannelHandler(messageHandler));

@@ -1,8 +1,10 @@
 package cn.iocoder.taro.transport.netty4.codec;
 
+import cn.iocoder.taro.rpc.core.transport.Channel;
+import cn.iocoder.taro.rpc.core.transport.Codec;
 import cn.iocoder.taro.rpc.core.transport.exchange.Request;
 import cn.iocoder.taro.rpc.core.transport.exchange.Response;
-import com.alibaba.fastjson.JSON;
+import cn.iocoder.taro.transport.netty4.NettyChannel;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -11,11 +13,17 @@ import java.util.List;
 
 public class NettyDecoder extends ByteToMessageDecoder {
 
-    // TODO 芋艿，
+    private final Codec codec;
+
+    public NettyDecoder(Codec codec) {
+        this.codec = codec;
+    }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         System.out.println("解析消息：");
+        Channel channel = ctx.channel().attr(NettyChannel.ATTR_CHANNEL).get();
+
         // short 2
         // long requestId
         // int data length
@@ -44,16 +52,19 @@ public class NettyDecoder extends ByteToMessageDecoder {
                 in.resetReaderIndex();
                 return;
             }
-            StringBuilder jsonStr = new StringBuilder();
-            for (int i = 0; i < length; i++) {
-                jsonStr.append(in.readChar());
-            }
+            byte[] dataBytes = new byte[length];
+            in.readBytes(dataBytes);
+//            StringBuilder jsonStr = new StringBuilder();
+//            for (int i = 0; i < length; i++) {
+//                jsonStr.append(in.readChar());
+//            }
             Request request = new Request(requestId);
             request.setOneway(oneway == 1);
             request.setEvent(event == 1);
-            request.setData(JSON.parse(jsonStr.toString()));
+//            request.setData(JSON.parse(jsonStr.toString()));
+            request.setData(codec.decode(channel, dataBytes));
             out.add(request);
-            System.out.println("接收请求：" + jsonStr);
+            System.out.println("接收请求：" + request.getData());
         } else if (requestFlag == 1) {
             if (in.readableBytes() < 1 + 4) {
                 in.resetReaderIndex();
@@ -68,16 +79,20 @@ public class NettyDecoder extends ByteToMessageDecoder {
                 in.resetReaderIndex();
                 return;
             }
-            StringBuilder jsonStr = new StringBuilder();
-            for (int i = 0; i < length; i++) {
-                jsonStr.append(in.readChar());
-            }
+            byte[] dataBytes = new byte[length];
+            in.readBytes(dataBytes);
+//            StringBuilder jsonStr = new StringBuilder();
+//            for (int i = 0; i < length; i++) {
+//                jsonStr.append(in.readChar());
+//            }
             if (status == Response.STATUS_SUCCESS) {
-                response.setData(JSON.parse(jsonStr.toString()));
-                System.out.println("接收正常响应：" + jsonStr);
+//                response.setData(JSON.parse(jsonStr.toString()));
+                response.setData(codec.decode(channel, dataBytes));
+                System.out.println("接收正常响应：" + response.getData());
             } else {
-                response.setErrorMsg(JSON.parseObject(jsonStr.toString(), String.class));
-                System.out.println("接收异常响应：" + jsonStr);
+//                response.setErrorMsg(JSON.parseObject(jsonStr.toString(), String.class));
+                response.setErrorMsg((String) codec.decode(channel, dataBytes));
+                System.out.println("接收异常响应：" + response.getData());
             }
             out.add(response);
         }

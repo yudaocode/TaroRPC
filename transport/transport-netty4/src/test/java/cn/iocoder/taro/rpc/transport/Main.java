@@ -1,8 +1,6 @@
 package cn.iocoder.taro.rpc.transport;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 
 public class Main {
 
@@ -16,13 +14,16 @@ public class Main {
 //            System.out.println(entry.getKey() + "\t" + entry.getData());
 //        }
 //        ParserConfig.getGlobalInstance().addAccept("java.lang.");
-        ParserConfig.getGlobalInstance().setAutoTypeSupport(true);
-        try {
-            int k = 1 / 0;
-        } catch (Exception e) {
-            String str = JSON.toJSONString(e, SerializerFeature.WriteEnumUsingToString, SerializerFeature.WriteClassName);
-            System.out.println(JSON.parse(str));
-        }
+//        ParserConfig.getGlobalInstance().setAutoTypeSupport(true);
+//        try {
+//            int k = 1 / 0;
+//        } catch (Exception e) {
+//            String str = JSON.toJSONString(e, SerializerFeature.WriteEnumUsingToString, SerializerFeature.WriteClassName);
+//            System.out.println(JSON.parse(str));
+//        }
+        String hello = "hello";
+        byte[] bytes = JSON.toJSONBytes(hello);
+        System.out.println(JSON.parse(bytes));
     }
 
 }

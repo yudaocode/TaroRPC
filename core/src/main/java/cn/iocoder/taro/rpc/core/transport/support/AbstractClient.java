@@ -1,5 +1,6 @@
 package cn.iocoder.taro.rpc.core.transport.support;
 
+import cn.iocoder.taro.rpc.core.rpc.FastJSONCodec;
 import cn.iocoder.taro.rpc.core.transport.*;
 import cn.iocoder.taro.rpc.core.transport.exception.TransportException;
 import cn.iocoder.taro.rpc.core.transport.exchange.*;
@@ -12,6 +13,7 @@ public abstract class AbstractClient implements Client {
     private volatile boolean closed = false;
 
     protected MessageHandler messageHandler;
+    protected Codec codec = new FastJSONCodec(); // TODO 芋艿，codec 重构
 
     public AbstractClient(String host, int port, ExchangeHandler exchangeHandler) {
         this.host = host;

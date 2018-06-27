@@ -51,8 +51,8 @@ public class NettyServer extends AbstractServer {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline()
-                                    .addLast("decoder", new NettyDecoder())
-                                    .addLast("encoder", new NettyEncoder())
+                                    .addLast("decoder", new NettyDecoder(codec))
+                                    .addLast("encoder", new NettyEncoder(codec))
                                     .addLast("manager", channelManager)
                                     .addLast("idleState", new IdleStateHandler(0, 0, TaroConstants.TRANSPORT_SERVER_IDLE, TimeUnit.MILLISECONDS))
                                     .addLast("heartbeat", new ServerHeartbeatHandler())

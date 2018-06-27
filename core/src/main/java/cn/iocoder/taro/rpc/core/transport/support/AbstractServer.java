@@ -1,5 +1,7 @@
 package cn.iocoder.taro.rpc.core.transport.support;
 
+import cn.iocoder.taro.rpc.core.rpc.FastJSONCodec;
+import cn.iocoder.taro.rpc.core.transport.Codec;
 import cn.iocoder.taro.rpc.core.transport.MessageHandler;
 import cn.iocoder.taro.rpc.core.transport.Server;
 import cn.iocoder.taro.rpc.core.transport.exchange.ExchangeHandler;
@@ -13,6 +15,7 @@ public abstract class AbstractServer implements Server {
     protected final int port;
 
     protected MessageHandler messageHandler;
+    protected Codec codec = new FastJSONCodec(); // TODO 芋艿，codec 重构
 
     protected AbstractServer(int port, ExchangeHandler exchangeHandler) {
         this.port = port;
