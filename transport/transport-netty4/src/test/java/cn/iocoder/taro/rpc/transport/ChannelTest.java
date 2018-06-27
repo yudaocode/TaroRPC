@@ -2,7 +2,7 @@ package cn.iocoder.taro.rpc.transport;
 
 import cn.iocoder.taro.rpc.core.transport.Client;
 import cn.iocoder.taro.rpc.core.transport.Server;
-import cn.iocoder.taro.rpc.core.transport.TransportException;
+import cn.iocoder.taro.rpc.core.transport.exception.TransportException;
 import cn.iocoder.taro.rpc.core.transport.exchange.*;
 import cn.iocoder.taro.transport.netty4.NettyClient;
 import cn.iocoder.taro.transport.netty4.NettyServer;
@@ -35,11 +35,14 @@ public class ChannelTest {
                     } catch (InterruptedException e) {
                     }
                 }
+                if (request.getData() instanceof String && request.getData().equals("error")) {
+                    throw new RuntimeException("发生异常");
+                }
 
                 Response response = new Response(request.getId());
                 response.setEvent(false);
                 response.setStatus(Response.STATUS_SUCCESS);
-                response.setValue(request.getData());
+                response.setData(request.getData());
 
                 return response;
             }
@@ -66,13 +69,19 @@ public class ChannelTest {
     @Test
     public void testSync() throws TransportException, InterruptedException {
         Response response = client.requestSync("hello", 10000);
-        Assert.assertEquals(response.getValue(), "hello");
+        Assert.assertEquals(response.getData(), "hello");
+    }
+
+    @Test
+    public void testSyncError() throws TransportException, InterruptedException {
+        Response response = client.requestSync("error", 10000);
+        Assert.assertNotNull(response.getErrorMsg());
     }
 
     @Test
     public void testAsync() throws TransportException, InterruptedException {
-        InvokeFuture future = client.requestAsync("hello", 1000);
-        Assert.assertEquals(future.waitResponse().getValue(), "hello");
+        InvokeFuture future = client.requestAsync("hello", 100000);
+        Assert.assertEquals(future.waitResponse().getData(), "hello");
     }
 
     @Test

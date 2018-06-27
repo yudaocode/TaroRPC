@@ -1,6 +1,7 @@
 package cn.iocoder.taro.rpc.core.transport.support;
 
 import cn.iocoder.taro.rpc.core.transport.*;
+import cn.iocoder.taro.rpc.core.transport.exception.TransportException;
 import cn.iocoder.taro.rpc.core.transport.exchange.Request;
 import cn.iocoder.taro.rpc.core.transport.exchange.Response;
 import cn.iocoder.taro.rpc.core.transport.exchange.ResponseCallback;
@@ -16,10 +17,8 @@ public abstract class AbstractChannel implements Channel {
 
     @Override
     public Response requestSync(Object request, long timeoutMillis) throws InterruptedException, TransportException { // 参考自 sofa-bolt ，不同于 dubbo 和 motan 的方式。避免无效的扫描。
-//        ResponseFuture future = this.requestAsync(request);
-//        return future.waitResponse();
         Request req = buildRequest(request, false);
-        InvokeFuture future = new InvokeFuture(this, req);
+        InvokeFuture future = new InvokeFuture(this, req, timeoutMillis);
         send(req);
         // 等待结果
         Response response = future.waitResponse(timeoutMillis);
@@ -28,15 +27,15 @@ public abstract class AbstractChannel implements Channel {
             return response;
         }
         // 超时结果
-        response = InvokeFuture.createTimeoutResponse(req.getId());
+        response = InvokeFuture.createTimeoutResponse(future);
         return response;
     }
 
     @Override
     public InvokeFuture requestAsync(Object request, long timeoutMillis) throws TransportException {
         Request req = buildRequest(request, false);
-        InvokeFuture future = new InvokeFuture(this, req);
-        InvokeFuture.addTimeoutTask(future, timeoutMillis); // 设置超时任务
+        InvokeFuture future = new InvokeFuture(this, req, timeoutMillis);
+        InvokeFuture.addTimeoutTask(future); // 设置超时任务
         send(req);
         return future;
     }

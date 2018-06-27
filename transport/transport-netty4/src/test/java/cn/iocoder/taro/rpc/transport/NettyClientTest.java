@@ -3,7 +3,7 @@ package cn.iocoder.taro.rpc.transport;
 import cn.iocoder.taro.rpc.core.transport.Channel;
 import cn.iocoder.taro.rpc.core.transport.Client;
 import cn.iocoder.taro.rpc.core.transport.Server;
-import cn.iocoder.taro.rpc.core.transport.TransportException;
+import cn.iocoder.taro.rpc.core.transport.exception.TransportException;
 import cn.iocoder.taro.rpc.core.transport.exchange.ExchangeHandler;
 import cn.iocoder.taro.rpc.core.transport.exchange.Request;
 import cn.iocoder.taro.rpc.core.transport.exchange.Response;
@@ -32,7 +32,7 @@ public class NettyClientTest {
                 Response response = new Response(request.getId());
                 response.setEvent(false);
                 response.setStatus(Response.STATUS_SUCCESS);
-                response.setValue(request.getData());
+                response.setData(request.getData());
 
                 return response;
             }
@@ -51,7 +51,7 @@ public class NettyClientTest {
             e.printStackTrace();
             client.reconnect();
             Response result = client.requestSync("hello", 1000);
-            Assert.assertEquals(result.getValue(), "hello");
+            Assert.assertEquals(result.getData(), "hello");
         }
     }
 
@@ -61,7 +61,7 @@ public class NettyClientTest {
         closeAll();
         // 尝试发送请求，应该是失败的
         Response response = client.requestSync("hello", 1000);
-        Assert.assertNotNull(response.getException());
+        Assert.assertNotNull(response.getErrorMsg());
     }
 
     /**

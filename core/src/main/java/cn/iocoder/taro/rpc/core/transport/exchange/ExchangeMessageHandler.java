@@ -2,7 +2,8 @@ package cn.iocoder.taro.rpc.core.transport.exchange;
 
 import cn.iocoder.taro.rpc.core.transport.Channel;
 import cn.iocoder.taro.rpc.core.transport.MessageHandler;
-import cn.iocoder.taro.rpc.core.transport.TransportException;
+import cn.iocoder.taro.rpc.core.transport.exception.TransportException;
+import cn.iocoder.taro.rpc.core.util.ExceptionUtil;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -37,12 +38,21 @@ public class ExchangeMessageHandler implements MessageHandler {
             if (exchangeHandler == null) { // 对于客户端，目前暂时不需要处理。 TODO 芋艿，后面要添加下对 read_only 事件的处理
                 return;
             }
-            Response response = exchangeHandler.reply((Request) message);
+            // 回复请求
+            Request request = (Request) message;
+            Response response;
+            try {
+                response = exchangeHandler.reply(request);
+            } catch (Throwable th) {
+                // TODO 芋艿，打印错误日志
+                response = new Response(request.getId()).setEvent(false).setStatus(Response.STATUS_SERVICE_ERROR)
+                        .setErrorMsg(ExceptionUtil.getMessage(th));
+            }
             if (response != null) {
                 try {
                     channel.send(response);
                 } catch (TransportException e) {
-                    e.printStackTrace(); // TODO 芋艿，后续的处理。
+                    e.printStackTrace(); // TODO 芋艿，打印错误日志
                 }
             }
         } else if (message instanceof Response) {

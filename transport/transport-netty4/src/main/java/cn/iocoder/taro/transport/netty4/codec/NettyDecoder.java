@@ -11,7 +11,7 @@ import java.util.List;
 
 public class NettyDecoder extends ByteToMessageDecoder {
 
-    // TODO 芋艿，优化，decode 只解析部分，更细的解析，在多线程里。即 motan NettyMessage 的做法
+    // TODO 芋艿，
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
@@ -60,7 +60,9 @@ public class NettyDecoder extends ByteToMessageDecoder {
                 return;
             }
             byte status = in.readByte();
-            assert status == Response.STATUS_SUCCESS; // TODO 芋艿，后面修改下
+            Response response = new Response(requestId);
+            response.setEvent(event == 1);
+            response.setStatus(status);
             int length = in.readInt();
             if (in.readableBytes() < length) { // 不够
                 in.resetReaderIndex();
@@ -70,13 +72,14 @@ public class NettyDecoder extends ByteToMessageDecoder {
             for (int i = 0; i < length; i++) {
                 jsonStr.append(in.readChar());
             }
-
-            Response response = new Response(requestId);
-            response.setEvent(false);
-            response.setStatus(Response.STATUS_SUCCESS);
-            response.setValue(JSON.parse(jsonStr.toString()));
+            if (status == Response.STATUS_SUCCESS) {
+                response.setData(JSON.parse(jsonStr.toString()));
+                System.out.println("接收正常响应：" + jsonStr);
+            } else {
+                response.setErrorMsg(JSON.parseObject(jsonStr.toString(), String.class));
+                System.out.println("接收异常响应：" + jsonStr);
+            }
             out.add(response);
-            System.out.println("接收响应：" + jsonStr);
         }
     }
 

@@ -1,6 +1,7 @@
 package cn.iocoder.taro.rpc.core.transport.heartbeat;
 
 import cn.iocoder.taro.rpc.core.transport.*;
+import cn.iocoder.taro.rpc.core.transport.exception.TransportException;
 import cn.iocoder.taro.rpc.core.transport.exchange.Request;
 import cn.iocoder.taro.rpc.core.transport.exchange.Response;
 import cn.iocoder.taro.rpc.core.util.ObjectUtil;
@@ -23,13 +24,13 @@ public class HeartbeatMessageHandler implements MessageHandler {
     }
 
     public static Response createHeartbeatResponse(long id) {
-        return new Response(id).setEvent(true).setStatus(Response.STATUS_SUCCESS).setValue(Response.DATA_EVENT_HEARTBEAT);
+        return new Response(id).setEvent(true).setStatus(Response.STATUS_SUCCESS).setData(Response.DATA_EVENT_HEARTBEAT);
     }
 
     public static boolean isHeartbeatResponse(Response response) {
         return response.isEvent()
                 && response.getStatus() == Response.STATUS_SUCCESS
-                && ObjectUtil.equals(response.getValue(), Response.DATA_EVENT_HEARTBEAT);
+                && ObjectUtil.equals(response.getData(), Response.DATA_EVENT_HEARTBEAT);
     }
 
     @Override

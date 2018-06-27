@@ -2,7 +2,7 @@ package cn.iocoder.taro.transport.netty4;
 
 import cn.iocoder.taro.rpc.core.common.TaroConstants;
 import cn.iocoder.taro.rpc.core.transport.Channel;
-import cn.iocoder.taro.rpc.core.transport.TransportException;
+import cn.iocoder.taro.rpc.core.transport.exception.TransportException;
 import cn.iocoder.taro.rpc.core.transport.exchange.ExchangeHandler;
 import cn.iocoder.taro.rpc.core.transport.exchange.Request;
 import cn.iocoder.taro.rpc.core.transport.support.AbstractServer;
@@ -113,9 +113,9 @@ public class NettyServer extends AbstractServer {
 //                response.setEvent(false);
 //                response.setStatus(Response.STATUS_SUCCESS);
 //                if (request.getData().equals("\"hello\"")) {
-//                    response.setValue("world");
+//                    response.setData("world");
 //                } else {
-//                    response.setValue("unknown");
+//                    response.setData("unknown");
 //                }
 //
 //                return response;

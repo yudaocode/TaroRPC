@@ -52,7 +52,7 @@ public class NettyChannel extends AbstractChannel {
                 }
                 InvokeFuture future = InvokeFuture.getFuture(request.getId());
                 if (future != null) {
-                    future.notifyResponse(InvokeFuture.createTimeoutResponse(request.getId())); // TODO 芋艿，需要修改下
+                    future.notifyResponse(InvokeFuture.createSendErrorResponse(future));
                 }
             }
 

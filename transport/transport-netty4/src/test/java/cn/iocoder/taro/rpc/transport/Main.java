@@ -1,19 +1,27 @@
 package cn.iocoder.taro.rpc.transport;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 public class Main {
 
     public static void main(String[] args) {
-        ConcurrentMap<String, String> map = new ConcurrentHashMap<String, String>();
-        map.put("1", "2");
-        map.put("2", "3");
-        map.put("3", "4");
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            map.remove(entry.getKey());
-            System.out.println(entry.getKey() + "\t" + entry.getValue());
+//        ConcurrentMap<String, String> map = new ConcurrentHashMap<String, String>();
+//        map.put("1", "2");
+//        map.put("2", "3");
+//        map.put("3", "4");
+//        for (Map.Entry<String, String> entry : map.entrySet()) {
+//            map.remove(entry.getKey());
+//            System.out.println(entry.getKey() + "\t" + entry.getData());
+//        }
+//        ParserConfig.getGlobalInstance().addAccept("java.lang.");
+        ParserConfig.getGlobalInstance().setAutoTypeSupport(true);
+        try {
+            int k = 1 / 0;
+        } catch (Exception e) {
+            String str = JSON.toJSONString(e, SerializerFeature.WriteEnumUsingToString, SerializerFeature.WriteClassName);
+            System.out.println(JSON.parse(str));
         }
     }
 

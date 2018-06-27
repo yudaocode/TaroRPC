@@ -2,7 +2,7 @@ package cn.iocoder.taro.rpc.transport;
 
 import cn.iocoder.taro.rpc.core.transport.Client;
 import cn.iocoder.taro.rpc.core.transport.Server;
-import cn.iocoder.taro.rpc.core.transport.TransportException;
+import cn.iocoder.taro.rpc.core.transport.exception.TransportException;
 import cn.iocoder.taro.rpc.core.transport.exchange.ExchangeHandler;
 import cn.iocoder.taro.rpc.core.transport.exchange.Request;
 import cn.iocoder.taro.rpc.core.transport.exchange.Response;
@@ -34,9 +34,9 @@ public class ClientHeartbeatHandlerTest {
                 response.setEvent(false);
                 response.setStatus(Response.STATUS_SUCCESS);
                 if (request.getData().equals("\"hello\"")) {
-                    response.setValue("world");
+                    response.setData("world");
                 } else {
-                    response.setValue("unknown");
+                    response.setData("unknown");
                 }
 
                 return response;
@@ -55,7 +55,7 @@ public class ClientHeartbeatHandlerTest {
     public void testHeartbeat() throws TransportException, InterruptedException {
         Request heartbeat = HeartbeatMessageHandler.createHeartbeatRequest();
         Response response = client.requestSync(heartbeat, 1000);
-        System.out.println(response.getValue());
+        System.out.println(response.getData());
         Assert.assertEquals(heartbeat.getId(), response.getId());
         Assert.assertEquals(heartbeat.getData(), Response.DATA_EVENT_HEARTBEAT);
     }

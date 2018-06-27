@@ -3,7 +3,7 @@ package cn.iocoder.taro.rpc.transport;
 import cn.iocoder.taro.rpc.core.common.TaroConstants;
 import cn.iocoder.taro.rpc.core.transport.Client;
 import cn.iocoder.taro.rpc.core.transport.Server;
-import cn.iocoder.taro.rpc.core.transport.TransportException;
+import cn.iocoder.taro.rpc.core.transport.exception.TransportException;
 import cn.iocoder.taro.rpc.core.transport.exchange.ExchangeHandler;
 import cn.iocoder.taro.rpc.core.transport.exchange.Request;
 import cn.iocoder.taro.rpc.core.transport.exchange.Response;

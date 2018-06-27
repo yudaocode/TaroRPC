@@ -1,6 +1,7 @@
 package cn.iocoder.taro.rpc.core.transport.support;
 
 import cn.iocoder.taro.rpc.core.transport.*;
+import cn.iocoder.taro.rpc.core.transport.exception.TransportException;
 import cn.iocoder.taro.rpc.core.transport.exchange.*;
 import cn.iocoder.taro.rpc.core.transport.heartbeat.HeartbeatMessageHandler;
 

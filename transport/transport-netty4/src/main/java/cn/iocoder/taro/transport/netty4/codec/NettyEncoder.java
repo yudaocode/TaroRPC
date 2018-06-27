@@ -9,6 +9,8 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 public class NettyEncoder extends MessageToByteEncoder<Object> {
 
+
+
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
         System.out.println("准备发送消息：" + msg);
@@ -33,7 +35,12 @@ public class NettyEncoder extends MessageToByteEncoder<Object> {
             out.writeByte(response.isEvent() ? 1 : 0); // event
             out.writeLong(response.getId()); // id
             out.writeByte(response.getStatus()); // status
-            String dataString = JSON.toJSONString(response.getValue());
+            String dataString;
+            if (response.getStatus() == Response.STATUS_SUCCESS) {
+                dataString = JSON.toJSONString(response.getData());
+            } else {
+                dataString = JSON.toJSONString(response.getErrorMsg());
+            }
             out.writeInt(dataString.length()); // data length
             for (char ch : dataString.toCharArray()) { // data content
                 out.writeChar(ch);

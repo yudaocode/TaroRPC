@@ -1,6 +1,8 @@
 package cn.iocoder.taro.rpc.core.transport.exchange;
 
 import cn.iocoder.taro.rpc.core.transport.Channel;
+import cn.iocoder.taro.rpc.core.transport.exception.TransportException;
+import cn.iocoder.taro.rpc.core.transport.exception.TransportTimeoutException;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,8 +15,7 @@ public class InvokeFuture {
     private static final ConcurrentMap<Long, InvokeFuture> FUTURES = new ConcurrentHashMap<Long, InvokeFuture>();
     private static final TimeoutTaskScanner SCANNER = new TimeoutTaskScanner();
 
-    //    private final Object lock = new Object();
-    private final CountDownLatch latch = new CountDownLatch(1); // TODO 芋艿，性能，后续对比三种方式的性能差别
+    private final CountDownLatch latch = new CountDownLatch(1);
     private final Channel channel;
     private final Request request;
     private volatile Response response;
@@ -22,8 +23,11 @@ public class InvokeFuture {
     /**
      * 创建开始时间，用于超时逻辑
      */
-    private long startTimeMillis = 0;
-    private long timeoutMillis = 0;
+    private final long startTimeMillis;
+    /**
+     * 超时时间，用于超时逻辑
+     */
+    private final long timeoutMillis;
 
     static {
         Thread th = new Thread(SCANNER);
@@ -31,9 +35,11 @@ public class InvokeFuture {
         th.start();
     }
 
-    public InvokeFuture(Channel channel, Request request) {
+    public InvokeFuture(Channel channel, Request request, long timeoutMillis) {
         this.channel = channel;
         this.request = request;
+        this.startTimeMillis = System.currentTimeMillis();
+        this.timeoutMillis = this.startTimeMillis + timeoutMillis;
         // 添加到 FUTURES 中
         FUTURES.put(request.getId(), this);
     }
@@ -68,7 +74,7 @@ public class InvokeFuture {
         try {
             this.response = response;
             // 回调
-            onCallback(response, callback);
+            doCallback(response, callback);
         } finally {
             // 唤醒
             latch.countDown();
@@ -87,23 +93,33 @@ public class InvokeFuture {
     public InvokeFuture setCallback(ResponseCallback callback) {
         this.callback = callback;
         // 回调
-        onCallback(response, callback);
+        doCallback(response, callback);
         return this;
     }
 
-    private void onCallback(Response response, ResponseCallback callback) {
+    private void doCallback(Response response, ResponseCallback callback) {
         if (response != null && callback != null) {
-            if (response.getValue() != null) {
-                callback.onSuccess(response.getValue());
-            } else if (response.getException() != null) {
-                callback.onFailure(response.getException());
+            try {
+                if (response.getData() != null) {
+                    callback.onSuccess(response.getData());
+                } else if (response.getErrorMsg() != null) {
+                    TransportException exception;
+                    switch (response.getStatus()) {
+                        case Response.STATUS_TIMEOUT:
+                            exception = new TransportTimeoutException(channel.getLocalAddress(), channel.getRemoteAddress(), response.getErrorMsg());
+                            break;
+                        default:
+                            exception = new TransportException(channel.getLocalAddress(), channel.getRemoteAddress(), response.getErrorMsg());
+                    }
+                    callback.onFailure(exception);
+                }
+            } catch (Throwable throwable) {
+                // TODO 芋艿，打印日志
             }
         }
     }
 
-    public static void addTimeoutTask(InvokeFuture future, long timeoutMillis) {
-        SCANNER.addTask(future, timeoutMillis);
-    }
+
 
     private static class TimeoutTaskScanner implements Runnable {
 
@@ -119,7 +135,7 @@ public class InvokeFuture {
                             continue;
                         }
                         // 超时
-                        Response response = createTimeoutResponse(entry.getKey());
+                        Response response = createTimeoutResponse(future);
                         boolean success = future.notifyResponse(response);
                         if (!success) { //
                             removeTask(future);
@@ -133,9 +149,7 @@ public class InvokeFuture {
             }
         }
 
-        void addTask(InvokeFuture future, long timeoutMillis) {
-            future.startTimeMillis = System.currentTimeMillis();
-            future.timeoutMillis = future.startTimeMillis + timeoutMillis;
+        void addTask(InvokeFuture future) {
             this.tasks.put(future.request.getId(), future);
         }
 
@@ -145,13 +159,24 @@ public class InvokeFuture {
 
     }
 
+    public static void addTimeoutTask(InvokeFuture future) {
+        SCANNER.addTask(future);
+    }
+
     public static InvokeFuture getFuture(long requestId) {
         return FUTURES.get(requestId);
     }
 
-    public static Response createTimeoutResponse(long id) {
-        return new Response(id).setEvent(false).setStatus(Response.STATUS_TIMEOUT)
-                .setException(new RuntimeException("超时")); // TODO 芋艿，悲剧
+    public static Response createTimeoutResponse(InvokeFuture future) {
+        return new Response(future.request.getId()).setEvent(false).setStatus(Response.STATUS_TIMEOUT)
+                .setErrorMsg(String.format("等待响应时间超时：client=%s, server=%s, startTimeMillis=%d, timeoutMillis=%d, endTimeMillis=%d",
+                        future.channel.getLocalAddress(), future.channel.getRemoteAddress(), future.startTimeMillis, future.timeoutMillis, System.currentTimeMillis()));
+    }
+
+    public static Response createSendErrorResponse(InvokeFuture future) {
+        return new Response(future.request.getId()).setEvent(false).setStatus(Response.STATUS_SEND_ERROR)
+                .setErrorMsg(String.format("发送请求失败：client=%s, server=%s, startTimeMillis=%d, timeoutMillis=%d, endTimeMillis=%d",
+                        future.channel.getLocalAddress(), future.channel.getRemoteAddress(), future.startTimeMillis, future.timeoutMillis, System.currentTimeMillis()));
     }
 
 }
