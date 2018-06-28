@@ -6,11 +6,18 @@
 * [ 需要优化 ] callback
 * [ 需要优化 ] 超时
 * [ 需要优化 ] 增加 MessageHandler
-* [ ] Codec
-* [ ] 分层优化
+* [ 需要优化 ] Codec
+* [ 需要优化 ] 分层优化
+* [] 优化：协议的字节占用
 * [ ] 调用错误时的链接检测
 * [ ] 重连
 * [ ] 非关键方法的实现
 * [ ] 多连接
 * [ ] 连接状态
 * [ ] 优化，decode 只解析部分，更细的解析，在多线程里。即 motan NettyMessage 的做法
+
+# RPC
+
+* [ ] Protocol
+* [ ] Invoker Result Invocation
+* [ ]

@@ -1,19 +1,20 @@
-package cn.iocoder.taro.rpc.core.rpc;
+package cn.iocoder.taro.rpc.core.protocol.taro;
 
 import cn.iocoder.taro.rpc.core.transport.Channel;
 import cn.iocoder.taro.rpc.core.transport.Codec;
-import com.alibaba.fastjson.JSON;
 
-public class FastJSONCodec implements Codec {
+public class TaroCodec implements Codec {
 
     @Override
     public byte[] encodeBody(Channel channel, Object data) {
-        return JSON.toJSONBytes(data);
+        // Request
+        // Response
+        return new byte[0];
     }
 
     @Override
     public Object decodeBody(Channel channel, byte[] bytes) {
-        return JSON.parse(bytes);
+        return null;
     }
 
 }

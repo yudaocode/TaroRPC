@@ -5,7 +5,6 @@ import cn.iocoder.taro.rpc.core.transport.Codec;
 import cn.iocoder.taro.rpc.core.transport.exchange.Request;
 import cn.iocoder.taro.rpc.core.transport.exchange.Response;
 import cn.iocoder.taro.transport.netty4.NettyChannel;
-import com.alibaba.fastjson.JSON;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -30,7 +29,7 @@ public class NettyEncoder extends MessageToByteEncoder<Object> {
             out.writeByte(request.isOneway() ? 1 : 0); // oneway
             out.writeByte(request.isEvent() ? 1 : 0); // event
             out.writeLong(request.getId()); // id
-            byte[] dataBytes = codec.encode(channel, request.getData());
+            byte[] dataBytes = codec.encodeBody(channel, request.getData());
             out.writeInt(dataBytes.length);
             out.writeBytes(dataBytes);
 //            String dataString = JSON.toJSONString(request.getData());
@@ -48,9 +47,9 @@ public class NettyEncoder extends MessageToByteEncoder<Object> {
             out.writeByte(response.getStatus()); // status
             byte[] dataBytes;
             if (response.getStatus() == Response.STATUS_SUCCESS) {
-                dataBytes = codec.encode(channel, response.getData());
+                dataBytes = codec.encodeBody(channel, response.getData());
             } else {
-                dataBytes = codec.encode(channel, response.getErrorMsg());
+                dataBytes = codec.encodeBody(channel, response.getErrorMsg());
             }
             out.writeInt(dataBytes.length);
             out.writeBytes(dataBytes);

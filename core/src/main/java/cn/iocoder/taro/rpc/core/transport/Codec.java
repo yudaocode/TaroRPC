@@ -9,8 +9,8 @@ package cn.iocoder.taro.rpc.core.transport;
  */
 public interface Codec {
 
-    byte[] encode(Channel channel, Object data);
+    byte[] encodeBody(Channel channel, Object data);
 
-    Object decode(Channel channel, byte[] bytes);
+    Object decodeBody(Channel channel, byte[] bytes);
 
 }

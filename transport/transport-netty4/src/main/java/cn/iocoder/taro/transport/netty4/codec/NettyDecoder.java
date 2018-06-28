@@ -62,7 +62,7 @@ public class NettyDecoder extends ByteToMessageDecoder {
             request.setOneway(oneway == 1);
             request.setEvent(event == 1);
 //            request.setData(JSON.parse(jsonStr.toString()));
-            request.setData(codec.decode(channel, dataBytes));
+            request.setData(codec.decodeBody(channel, dataBytes));
             out.add(request);
             System.out.println("接收请求：" + request.getData());
         } else if (requestFlag == 1) {
@@ -87,11 +87,11 @@ public class NettyDecoder extends ByteToMessageDecoder {
 //            }
             if (status == Response.STATUS_SUCCESS) {
 //                response.setData(JSON.parse(jsonStr.toString()));
-                response.setData(codec.decode(channel, dataBytes));
+                response.setData(codec.decodeBody(channel, dataBytes));
                 System.out.println("接收正常响应：" + response.getData());
             } else {
 //                response.setErrorMsg(JSON.parseObject(jsonStr.toString(), String.class));
-                response.setErrorMsg((String) codec.decode(channel, dataBytes));
+                response.setErrorMsg((String) codec.decodeBody(channel, dataBytes));
                 System.out.println("接收异常响应：" + response.getData());
             }
             out.add(response);
