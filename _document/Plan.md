@@ -16,6 +16,11 @@
 * [ ] 连接状态
 * [ ] 优化，decode 只解析部分，更细的解析，在多线程里。即 motan NettyMessage 的做法
 
+## 序列化
+
+* [ ] 优化：参考 Dubbo Output 的设计，优化序列化逻辑
+* [ ]
+
 # RPC
 
 * [ ] Protocol

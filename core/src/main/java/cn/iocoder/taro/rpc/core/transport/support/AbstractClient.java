@@ -23,6 +23,11 @@ public abstract class AbstractClient implements Client {
         open();
     }
 
+    // TODO 芋艿，未来重构。目前用于 TaroCodec
+    public void setCodec(Codec codec) {
+        this.codec = codec;
+    }
+
     @Override
     public void oneway(Object request, long timeoutMillis) throws TransportException {
         getChannel().oneway(request, timeoutMillis);

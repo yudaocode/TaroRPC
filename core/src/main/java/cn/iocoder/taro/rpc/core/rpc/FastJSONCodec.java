@@ -7,13 +7,13 @@ import com.alibaba.fastjson.JSON;
 public class FastJSONCodec implements Codec {
 
     @Override
-    public byte[] encodeBody(Channel channel, Object data) {
-        return JSON.toJSONBytes(data);
+    public byte[] encodeBody(Channel channel, Object message) {
+        return JSON.toJSONBytes(message);
     }
 
     @Override
-    public Object decodeBody(Channel channel, byte[] bytes) {
-        return JSON.parse(bytes);
+    public Object decodeBody(Channel channel, Object message, byte[] bodyBytes) {
+        return JSON.parse(bodyBytes);
     }
 
 }
