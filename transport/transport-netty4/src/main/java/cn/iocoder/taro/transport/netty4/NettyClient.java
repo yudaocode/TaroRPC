@@ -2,6 +2,7 @@ package cn.iocoder.taro.transport.netty4;
 
 import cn.iocoder.taro.rpc.core.common.TaroConstants;
 import cn.iocoder.taro.rpc.core.transport.Channel;
+import cn.iocoder.taro.rpc.core.transport.Codec;
 import cn.iocoder.taro.rpc.core.transport.exchange.ExchangeHandler;
 import cn.iocoder.taro.rpc.core.transport.support.AbstractClient;
 import cn.iocoder.taro.transport.netty4.codec.NettyDecoder;
@@ -28,6 +29,11 @@ public class NettyClient extends AbstractClient {
 
     public NettyClient(String host, int port, ExchangeHandler exchangeHandler) {
         super(host, port, exchangeHandler);
+    }
+
+    // TODO 芋艿
+    public NettyClient(String host, int port, ExchangeHandler exchangeHandler, Codec codec) {
+        super(host, port, exchangeHandler, codec);
     }
 
     @Override

@@ -34,7 +34,7 @@ public class TaroCodec extends AbstractCodec {
     private final Serialization serialization = new FastJSONSerialization();
 
     @Override
-    public byte[] encodeBody(Channel channel, Object message) {
+    public byte[] encodeBody(Channel channel, Object message, Object body) {
         // Request
         if (message instanceof Request) {
             return encodeRequestBody(channel, (Request) message);
@@ -43,6 +43,7 @@ public class TaroCodec extends AbstractCodec {
         if (message instanceof Response) {
             return encodeResponseBody(channel, (Response) message);
         }
+        // Other
         throw new TaroFrameworkException("编码失败：exception=未知的数据类型");
     }
 
@@ -124,6 +125,7 @@ public class TaroCodec extends AbstractCodec {
             invocation.setMethodName(input.readUTF());
             // argumentTypes TODO
             Class<?>[] argumentTypes = new Class<?>[]{String.class};
+            invocation.setArgumentTypes(argumentTypes);
 
             // 方法参数
             Object[] arguments = new Object[argumentTypes.length];
@@ -136,8 +138,7 @@ public class TaroCodec extends AbstractCodec {
         } finally {
             IOUtil.close(input, inputStream);
         }
-
-        return serialization.deserialize(bodyBytes, null);
+        return invocation;
     }
 
     private Object decodeResponseBody(Channel channel, Response response, byte[] bodyBytes) {
@@ -163,7 +164,7 @@ public class TaroCodec extends AbstractCodec {
                 return serialization.deserialize(bodyBytes, String.class);
             }
         } catch (Throwable e) {
-            throw new TaroFrameworkException("解码 Request 失败：exception=" + ExceptionUtil.getMessage(e));
+            throw new TaroFrameworkException("解码 Response 失败：exception=" + ExceptionUtil.getMessage(e));
         } finally {
             IOUtil.close(input, inputStream);
         }

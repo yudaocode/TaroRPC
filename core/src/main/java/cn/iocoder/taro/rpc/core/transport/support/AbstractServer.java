@@ -15,11 +15,16 @@ public abstract class AbstractServer implements Server {
     protected final int port;
 
     protected MessageHandler messageHandler;
-    protected Codec codec = new FastJSONCodec(); // TODO 芋艿，codec 重构
+    protected Codec codec;
 
     protected AbstractServer(int port, ExchangeHandler exchangeHandler) {
+        this(port, exchangeHandler, new FastJSONCodec());
+    }
+
+    protected AbstractServer(int port, ExchangeHandler exchangeHandler, Codec codec) {
         this.port = port;
         this.messageHandler = new HeartbeatMessageHandler(new ExchangeMessageHandler(null, exchangeHandler)); // TODO 芋艿，逻辑线程池的设置方式。
+        this.codec = codec;
 
         this.open();
     }

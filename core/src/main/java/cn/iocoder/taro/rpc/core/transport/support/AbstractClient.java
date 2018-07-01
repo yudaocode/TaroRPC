@@ -1,7 +1,9 @@
 package cn.iocoder.taro.rpc.core.transport.support;
 
 import cn.iocoder.taro.rpc.core.rpc.FastJSONCodec;
-import cn.iocoder.taro.rpc.core.transport.*;
+import cn.iocoder.taro.rpc.core.transport.Client;
+import cn.iocoder.taro.rpc.core.transport.Codec;
+import cn.iocoder.taro.rpc.core.transport.MessageHandler;
 import cn.iocoder.taro.rpc.core.transport.exception.TransportException;
 import cn.iocoder.taro.rpc.core.transport.exchange.*;
 import cn.iocoder.taro.rpc.core.transport.heartbeat.HeartbeatMessageHandler;
@@ -13,19 +15,19 @@ public abstract class AbstractClient implements Client {
     private volatile boolean closed = false;
 
     protected MessageHandler messageHandler;
-    protected Codec codec = new FastJSONCodec(); // TODO 芋艿，codec 重构
+    protected Codec codec;
 
     public AbstractClient(String host, int port, ExchangeHandler exchangeHandler) {
+        this(host, port, exchangeHandler, new FastJSONCodec());
+    }
+
+    public AbstractClient(String host, int port, ExchangeHandler exchangeHandler, Codec codec) {
         this.host = host;
         this.port = port;
         this.messageHandler = new HeartbeatMessageHandler(new ExchangeMessageHandler(null, exchangeHandler));
+        this.codec = codec;
 
         open();
-    }
-
-    // TODO 芋艿，未来重构。目前用于 TaroCodec
-    public void setCodec(Codec codec) {
-        this.codec = codec;
     }
 
     @Override

@@ -25,4 +25,6 @@
 
 * [ ] Protocol
 * [ ] Invoker Result Invocation
-* [ ]
+* [ ] 心跳和普通请求的兼容
+* [ ] Exporter
+* [ ] 方法参数

@@ -29,7 +29,7 @@ public class NettyEncoder extends MessageToByteEncoder<Object> {
             out.writeByte(request.isOneway() ? 1 : 0); // oneway
             out.writeByte(request.isEvent() ? 1 : 0); // event
             out.writeLong(request.getId()); // id
-            byte[] dataBytes = codec.encodeBody(channel, request.getData());
+            byte[] dataBytes = codec.encodeBody(channel, request, request.getData());
             out.writeInt(dataBytes.length);
             out.writeBytes(dataBytes);
 //            String dataString = JSON.toJSONString(request.getData());
@@ -47,9 +47,9 @@ public class NettyEncoder extends MessageToByteEncoder<Object> {
             out.writeByte(response.getStatus()); // status
             byte[] dataBytes;
             if (response.getStatus() == Response.STATUS_SUCCESS) {
-                dataBytes = codec.encodeBody(channel, response.getData());
+                dataBytes = codec.encodeBody(channel, response, response.getData());
             } else {
-                dataBytes = codec.encodeBody(channel, response.getErrorMsg());
+                dataBytes = codec.encodeBody(channel, response, response.getErrorMsg());
             }
             out.writeInt(dataBytes.length);
             out.writeBytes(dataBytes);

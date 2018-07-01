@@ -21,7 +21,7 @@ public class TaroInvoker extends AbstractInvoker {
         // TODO 同步、异步、oneway
         // TODO 超时
         try {
-            Response response = client.requestSync(invocation, 10 * 1000L);
+            Response response = client.requestSync(invocation, 1000 * 1000L);
             // TODO 芋艿，在 Dubbo 中，如果同步调用超时，直接抛出异常。
             if (response.getErrorMsg() != null) {
                 return new RpcResult(new TransportException(null, null, response.getErrorMsg()));

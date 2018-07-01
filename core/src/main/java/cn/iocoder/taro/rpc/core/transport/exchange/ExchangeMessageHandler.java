@@ -48,7 +48,7 @@ public class ExchangeMessageHandler implements MessageHandler {
                 response = new Response(request.getId()).setEvent(false).setStatus(Response.STATUS_SERVICE_ERROR)
                         .setErrorMsg(ExceptionUtil.getMessage(th));
             }
-            if (response != null) {
+            if (response != null && !request.isOneway()) {
                 try {
                     channel.send(response);
                 } catch (TransportException e) {
