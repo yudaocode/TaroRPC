@@ -5,6 +5,7 @@ import cn.iocoder.taro.rpc.core.protocol.Exporter;
 import cn.iocoder.taro.rpc.core.protocol.Protocol;
 import cn.iocoder.taro.rpc.core.rpc.Invocation;
 import cn.iocoder.taro.rpc.core.rpc.Invoker;
+import cn.iocoder.taro.rpc.core.transport.Client;
 import cn.iocoder.taro.rpc.core.transport.Codec;
 import cn.iocoder.taro.rpc.core.transport.Server;
 import cn.iocoder.taro.rpc.core.transport.exchange.ExchangeHandler;
@@ -19,7 +20,7 @@ public class TaroProtocol implements Protocol {
 
     private Map<Class, Exporter> exporters = new HashMap<>();
     private Map<Integer, Server> servers = new HashMap<>();
-    private static Server server;
+    private Map<String, Client> clients = new HashMap<>();
 
     private ExchangeHandler handler = new ExchangeHandler() {
 
@@ -54,13 +55,33 @@ public class TaroProtocol implements Protocol {
         return exporter;
     }
 
+    @Override
+    public <T> Invoker<T> refer(Class<T> clazz) {
+        String host = "127.0.0.1";
+        int port = 8080;
+        Client client = getClient(host, port);
+        clients.put(host + "-" + port, client);
+
+        return new TaroInvoker(client);
+    }
+
     private Server getServer(int port) {
         Class serverClass = ClassUtil.forName("cn.iocoder.taro.transport.netty4.NettyServer"); // TODO 芋艿，因为没有 spi ，先暂时反射
         try {
             return (Server) serverClass.getConstructor(int.class, ExchangeHandler.class, Codec.class)
                     .newInstance(port, handler, new TaroCodec());
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
+        } catch (Throwable th) {
+            throw new RuntimeException(th);
+        }
+    }
+
+    private Client getClient(String host, int port) {
+        Class clientClass = ClassUtil.forName("cn.iocoder.taro.transport.netty4.NettyClient"); // TODO 芋艿，因为没有 spi ，先暂时反射
+        try {
+            return (Client) clientClass.getConstructor(String.class, int.class, ExchangeHandler.class, Codec.class)
+                    .newInstance(host, port, null, new TaroCodec());
+        } catch (Throwable th) {
+            throw new RuntimeException(th);
         }
     }
 

@@ -34,4 +34,13 @@ public class RpcResult implements Result {
         return exception;
     }
 
+    @Override
+    public Object recreate() throws Throwable {
+        Throwable th = getException();
+        if (th != null) {
+            throw th;
+        }
+        return value;
+    }
+
 }

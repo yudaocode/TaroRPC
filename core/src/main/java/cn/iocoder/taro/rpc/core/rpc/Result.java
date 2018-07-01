@@ -6,6 +6,8 @@ public interface Result {
 
     Throwable getException();
 
+    Object recreate() throws Throwable;
+
     // TODO 芋艿，还有更多的方法
 
 }

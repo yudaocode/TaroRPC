@@ -6,4 +6,6 @@ public interface Protocol {
 
     Exporter export(Invoker invoker);
 
+    <T> Invoker<T> refer(Class<T> clazz);
+
 }

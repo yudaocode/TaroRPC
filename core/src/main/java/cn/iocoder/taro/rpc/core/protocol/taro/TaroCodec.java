@@ -61,6 +61,10 @@ public class TaroCodec extends AbstractCodec {
     }
 
     private byte[] encodeRequestBody(Channel channel, Request request) {
+        if (request.isEvent()) {
+            return encodeEventBody(channel, request.getData());
+        }
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ObjectOutput output = super.createObjectOutput(outputStream);
 
@@ -89,6 +93,10 @@ public class TaroCodec extends AbstractCodec {
         ObjectOutput output = null;
         try {
             if (response.getStatus() == Response.STATUS_SUCCESS) {
+                if (response.isEvent()) {
+                    return serialization.serialize(response.getData());
+                }
+
                 outputStream = new ByteArrayOutputStream();
                 output = super.createObjectOutput(outputStream);
 
@@ -116,6 +124,10 @@ public class TaroCodec extends AbstractCodec {
     }
 
     private Object decodeRequestBody(Channel channel, Request request, byte[] bodyBytes) {
+        if (request.isEvent()) {
+            return decodeEventBody(channel, bodyBytes);
+        }
+
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bodyBytes);
         ObjectInput input = super.createObjectInput(inputStream);
 
@@ -147,6 +159,10 @@ public class TaroCodec extends AbstractCodec {
 
         try {
             if (response.getStatus() == Response.STATUS_SUCCESS) {
+                if (response.isEvent()) {
+                    return decodeEventBody(channel, bodyBytes);
+                }
+
                 inputStream = new ByteArrayInputStream(bodyBytes);
                 input = super.createObjectInput(inputStream);
 
@@ -168,6 +184,14 @@ public class TaroCodec extends AbstractCodec {
         } finally {
             IOUtil.close(input, inputStream);
         }
+    }
+
+    private byte[] encodeEventBody(Channel channel, Object body) {
+        return serialization.serialize(body);
+    }
+
+    private String decodeEventBody(Channel channel, byte[] bodyBytes) {
+        return serialization.deserialize(bodyBytes, String.class);
     }
 
 }

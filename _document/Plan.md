@@ -19,12 +19,11 @@
 ## 序列化
 
 * [ ] 优化：参考 Dubbo Output 的设计，优化序列化逻辑
-* [ ]
 
 # RPC
 
-* [ ] Protocol
-* [ ] Invoker Result Invocation
-* [ ] 心跳和普通请求的兼容
-* [ ] Exporter
+* [ 需要优化 ] Protocol
+* [ 需要优化 ] Invoker Result Invocation
+* [ 需要优化 ] Exporter
+* [ 需要优化 ] 心跳和普通请求的兼容
 * [ ] 方法参数
