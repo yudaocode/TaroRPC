@@ -27,3 +27,36 @@
 * [ 需要优化 ] Exporter
 * [ 需要优化 ] 心跳和普通请求的兼容
 * [ ] 方法参数
+* [ ] injvm 协议
+* [ ] Filter
+* [ ] Mock
+* [ ] Stub
+* [ ] 泛化调用
+* [ ] 泛化引用
+
+# Config
+
+* [ ] Java API
+* [ ] Spring XML
+* [ ] Spring Annotations
+* [ ] Spring 外部化配置
+
+# 注册中心
+
+* [ ] Consul 初始拉取
+* [ ] Consul 实时监听
+
+# 集群容错
+
+* [ ] Directory
+* [ ] Cluster
+* [ ] LoadBalance
+* [ ] Router
+* [ ] Configuration
+
+# 公用
+
+* [ ] SPI 机制
+* [ ] URL 的设计
+* [ ] 性能测试
+* [ ] 单元测试
